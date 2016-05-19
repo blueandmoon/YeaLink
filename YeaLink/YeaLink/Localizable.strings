@@ -1,0 +1,48 @@
+/* 
+  Localizable.strings
+  YeaLink
+
+  Created by 李根 on 16/4/25.
+  Copyright © 2016年 ligen. All rights reserved.
+*/
+
+"enter.address" = "请输入号码";
+
+/* Register state */
+"registration.status.fail" = "注册失败";
+"registration.status.none" = "未注册";
+"registration.status.inprogress" = "注册中";
+"registration.status.ok" = "已注册";
+"registration.status.noaccount" = "未添加账号";
+
+/* Incoming call */
+"status.call.incoming" = "呼入中...";
+"status.in.call" = "通话中...";
+"status.ringing" = "振铃中...";
+
+/* SipCoreManager */
+"IC_MSG" = "%@ 来电";
+"You missed a call from %@" = "未接来电 %@";
+"Unknown" = "未知";
+"Answer" = "接听";
+"Show" = "查看";
+"Decline" = "拒绝";
+
+/* Settings */
+"settings.title" = "设置";
+"settings.sip.account.title" = "SIP 账号";
+"settings.audio.title" = "音频";
+"settings.video.title" = "视频";
+"settings.network.title" = "网络";
+"settings.video.enabled" = "启用视频";
+
+"settings.account.username" = "用户名";
+"settings.account.password" = "密码";
+"settings.account.domain" = "服务器";
+"settings.account.transport" = "协议";
+"settings.save" = "保存";
+"settings.stun.server" = "Stun 服务器";
+"settings.sip.port" = "Sip 端口号";
+"settings.audio.ports" = "音频端口号范围";
+"settings.video.ports" = "视频端口号范围";
+"settings.ice.enabled" = "启用 ICE";

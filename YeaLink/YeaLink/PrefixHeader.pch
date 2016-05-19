@@ -1,0 +1,80 @@
+//
+//  PrefixHeader.pch
+//  YeaLink
+//
+//  Created by 李根 on 16/4/24.
+//  Copyright © 2016年 ligen. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <CoreLocation/CoreLocation.h>
+
+#import "ConStants.h"
+#import "UIColor+Utils.h"
+
+#import "FVSIPSdk.h"
+
+/**
+ *  三方库,SDK
+ */
+#import "MBProgressHUD.h"
+#import <Masonry.h>
+#import "MJRefresh.h"
+#import "UIImageView+WebCache.h"    // sdwebimage
+
+
+/**
+ *   基类
+ */
+#import "BaseModel.h"
+
+#import "QJLBaseView.h"
+#import "QJLBaseLabel.h"
+#import "QJLBaseTextfield.h"
+#import "QJLBaseButton.h"
+#import "QJLBaseImageView.h"
+#import "QJLBaseTableView.h"
+#import "QJLBaseCollectionView.h"
+#import "QJLBaseTableViewCell.h"
+#import "QJLBaseCollectionViewCell.h"
+#import "BaseProgressHUD.h"
+#import "BaseWebViewController.h"
+
+// Tools
+#import "NetWorkingTool.h"
+#import "JSONKit.h"
+#import "AppTheme.h"
+#import "CheckFormatTool.h" //  正则验证, 手机号, 密码等
+#import "UserInformation.h" //  接收用户信息
+#import "MyMD5.h"
+
+/**
+ *  宏
+ */
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
+//  屏幕的单位宽和单位高, 比例长度
+#define WID [UIScreen mainScreen].bounds.size.width / 375
+#define HEI [UIScreen mainScreen].bounds.size.height / 667
+//  masonry约束
+#define TOP(View, f) make.top.equalTo(View).with.offset(f * HEI) //  顶部约束
+#define LEFT(View, f) make.left.equalTo(View).with.offset(f * WID)    //  左侧约束
+#define BOTTOM(View, f) make.bottom.equalTo(View).with.offset(f * HEI)  //  底部约束
+#define RIGHT(View, f) make.right.equalTo(View).with.offset(f * WID)  //  右侧约束
+#define Wequal(f) make.width.mas_equalTo(f * WID) //  宽度
+#define Hequal(f) make.height.mas_equalTo(f * HEI)    //  高度
+//  占位图
+#define PLACEIMAGE [UIImage imageNamed:@"placeholders"]
+
+#define COMMONURL @"http://qianjiale.doggadatachina.com/"
+
+
+#endif /* PrefixHeader_pch */
