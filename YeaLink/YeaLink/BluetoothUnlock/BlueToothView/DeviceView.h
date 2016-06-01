@@ -9,10 +9,7 @@
 #import "QJLBaseView.h"
 
 @interface DeviceView : QJLBaseView
-@property(nonatomic, strong)QJLBaseTextfield *passwordField;
-@property(nonatomic, strong)QJLBaseButton *connectBtn;
-@property(nonatomic, strong)QJLBaseButton *disconnectBtn;
-@property(nonatomic, strong)QJLBaseButton *openDoorBtn;
-@property(nonatomic, strong)QJLBaseButton *closeDoorBtn;
+@property(nonatomic, strong)QJLBaseView *bottomView;
+@property(nonatomic, strong)QJLBaseButton *button;
 
 @end

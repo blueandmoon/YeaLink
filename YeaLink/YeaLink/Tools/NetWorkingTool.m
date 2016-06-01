@@ -24,11 +24,12 @@
      *
      */
 //    NSLog(@"strURL%@", strURL);
+    request.cachePolicy = NSURLRequestUseProtocolCachePolicy;
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * _Nullable response, NSData * _Nullable data, NSError * _Nullable connectionError) {
         if (data == nil) {
             NSLog(@"~~~~~data is nil");
         } else {
-            id result = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+            id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONWritingPrettyPrinted error:nil];
 //            NSLog(@"%@", result);
             getBlock(result);
             
@@ -44,8 +45,23 @@
     [request setHTTPBody:bodyData];
     //  用NSURLSession写一次
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * _Nullable response, NSData * _Nullable data, NSError * _Nullable connectionError) {
-        id result = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONWritingPrettyPrinted error:nil];
         block(result);
+    }];
+}
+
+//  把获取到的原生data传回去
++ (void)postNetWorkigDoNothing:(NSString *)strURL bodyStr:(NSString *)bodyStr block:(Block)block {
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:strURL]];
+    [request setHTTPMethod:@"POST"];
+    NSData *bodyData = [bodyStr dataUsingEncoding:NSUTF8StringEncoding];
+    [request setHTTPBody:bodyData];
+    //  用NSURLSession写一次
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * _Nullable response, NSData * _Nullable data, NSError * _Nullable connectionError) {
+//        NSLog(@"data: %@", data);
+//        id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONWritingPrettyPrinted error:nil];
+        NSString *tempStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        block(tempStr);
     }];
 }
 

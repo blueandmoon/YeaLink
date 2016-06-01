@@ -19,6 +19,8 @@
 //        _bgImageView = [[QJLBaseImageView alloc] initWithImage:[UIImage imageNamed:@"start_icon375"]];
 //        [self.view addSubview:_bgImageView];
 //        _bgImageView.hidden = NO;
+        //  会影响导航栏上所有除返回以外的按钮
+        [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     }
     return self;
 }
@@ -27,30 +29,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 }
-
-- (void)getValue {
-    
-}
-
-- (void)getView {
-    
-}
-
-- (void)questData {
-    
-}
-
-- (void)newData {
-    
-}
-
-
-
-
-
-
-
-
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

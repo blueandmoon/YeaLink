@@ -11,6 +11,6 @@
 @interface EntranceGuardView : QJLBaseView
 @property(nonatomic, strong)QJLBaseTableView *tableView;
 @property(nonatomic, strong)NSMutableArray *arr;
-@property(nonatomic, strong)void(^jump)(NSInteger section); 
+@property(nonatomic, strong)void(^jump)(NSInteger row);
 
 @end

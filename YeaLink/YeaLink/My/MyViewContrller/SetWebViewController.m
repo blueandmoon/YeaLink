@@ -18,18 +18,22 @@
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    self.navigationController.navigationBar.hidden = YES;
+    self.navigationController.navigationBar.hidden = NO;
     
-    [self getHtmlWithTotalStr:[UserInformation userinforSingleton].strURL];
+    [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
 
-    _button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
-    [_button setTitle:@"个人中心" forState:UIControlStateNormal];
-    _button.font = [UIFont systemFontOfSize:15];
-    //    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-    [self.view addSubview:_button];
-    [_button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-    [_button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
-    _button.frame = CGRectMake(50 * WID, 25 * HEI, 70 * WID, 30 * HEI);
+//    _button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
+//    [_button setTitle:@"个人中心" forState:UIControlStateNormal];
+//    _button.font = [UIFont systemFontOfSize:15];
+//    //    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+//    [self.view addSubview:_button];
+//    [_button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+//    [_button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
+//    _button.frame = CGRectMake(50 * WID, 25 * HEI, 70 * WID, 30 * HEI);
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    self.navigationController.navigationBar.hidden = NO;
 }
 
 - (void)viewDidLoad {
@@ -37,7 +41,31 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor cyanColor];
     
+    [self settingNavigationbar];
 
+    self.backNative = ^() {
+        [self.navigationController popViewControllerAnimated:YES];
+    };
+    
+}
+
+- (void)settingNavigationbar {
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    self.navigationItem.titleView = label;
+    self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
+    self.takeStr = ^(NSString *currentTitle) {
+        label.text = currentTitle;
+    };
+    label.numberOfLines = 0;
+    [label sizeToFit];
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
+    
+    
+}
+
+- (void)back:(id)sender {
+    self.backforH5(self.wv);
 }
 
 - (void)backAction:(QJLBaseButton *)button {

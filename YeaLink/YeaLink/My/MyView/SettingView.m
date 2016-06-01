@@ -20,7 +20,7 @@
 - (void)createView {
     _arr = [NSMutableArray array];
     _arr = @[@"新消息提醒", @"功能介绍", @"帮助与反馈", @"官网", @"检查新版本", @"使用条款和隐私政策"];
-    _nextArr = [NSMutableArray arrayWithObjects:@"0", @"/PersonalCenter/FunctionIntroduction", @"/PersonalCenter/HelpAndFeedback", @"0", @"0", @"/PersonalCenter/TermsAndPrivacy", nil];
+    _nextArr = [NSMutableArray arrayWithObjects:@"0", @"/PersonalCenter/FunctionIntroduction", @"/PersonalCenter/HelpAndFeedback", @"http://www.go2family.com", @"0", @"/PersonalCenter/TermsAndPrivacy", nil];
     
     
     _tableView = [[QJLBaseTableView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, 350 * HEI) style:UITableViewStylePlain];
@@ -32,6 +32,14 @@
     _tableView.delegate = self;
     
     
+}
+
+- (void)setArr:(NSMutableArray *)arr {
+    if (_arr != arr) {
+        _arr = arr;
+    }
+    
+    [_tableView reloadData];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -54,6 +62,8 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    
 //    SettingCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     if ([_nextArr[indexPath.row] isEqualToString:@"0"]) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"功能尚未开发, 敬请期待!" message:nil delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];

@@ -19,7 +19,8 @@
 @class UISpeakerButton;
 
 @interface SIPPhoneHomeViewController : QJLBaseViewController
-@property(nonatomic, strong)QJLBaseTextfield *addressTextfield;
+//@property(nonatomic, strong)QJLBaseTextfield *addressTextfield;
+@property(nonatomic, strong)QJLBaseLabel *addressLabel; //  地址栏
 //@property(nonatomic, strong)QJLBaseButton *tableButton; //  设置按钮
 @property(nonatomic, strong)QJLBaseButton *photoButton; //  拍照
 @property(nonatomic, strong)UISpeakerButton *handsfreeButton; //  免提

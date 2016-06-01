@@ -29,7 +29,7 @@
 #import <Masonry.h>
 #import "MJRefresh.h"
 #import "UIImageView+WebCache.h"    // sdwebimage
-
+#import <JavaScriptCore/JavaScriptCore.h>
 
 /**
  *   基类
@@ -55,6 +55,13 @@
 #import "CheckFormatTool.h" //  正则验证, 手机号, 密码等
 #import "UserInformation.h" //  接收用户信息
 #import "MyMD5.h"
+#import "UploadTool.h"  //  上传图片
+#import "UIImage+Oricon.h"
+#import "UIColor+HexColor.h"    //  十六进制颜色值转换
+#import "Photo.h"
+#import "GifView.h"
+
+
 
 /**
  *  宏
@@ -73,8 +80,9 @@
 #define Hequal(f) make.height.mas_equalTo(f * HEI)    //  高度
 //  占位图
 #define PLACEIMAGE [UIImage imageNamed:@"placeholders"]
-
-#define COMMONURL @"http://qianjiale.doggadatachina.com/"
-
+//
+#define COMMONURL @"http://wapi.go2family.com/"
+//  自定义颜色
+#define CUSTOMBLUE [UIColor colorWithHex:0x13a3fe]
 
 #endif /* PrefixHeader_pch */

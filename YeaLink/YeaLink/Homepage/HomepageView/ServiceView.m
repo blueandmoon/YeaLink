@@ -45,6 +45,13 @@
     
 }
 
+- (void)setTempArr:(NSMutableArray *)tempArr {
+    if (_tempArr != tempArr) {
+        _tempArr = tempArr;
+    }
+    [_collectionview reloadData];
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.tempArr.count - 6;
 }

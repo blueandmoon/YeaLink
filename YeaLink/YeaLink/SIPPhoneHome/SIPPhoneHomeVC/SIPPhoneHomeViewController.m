@@ -8,12 +8,13 @@
 
 #import "SIPPhoneHomeViewController.h"
 #import "FVSIPSdk.h"
-#import "UIAddressTextField.h"
-#import "UIDigitButton.h"
-#import "UIVideoButton.h"
 //#import "SettingsViewController.h"
 #import "WebKeyManager.h"
 
+#import "UIAddressTextField.h"
+#import "UIDigitButton.h"
+#import "UIVideoButton.h"
+#import "VideoView.h"
 
 @interface SIPPhoneHomeViewController ()
 
@@ -21,6 +22,7 @@
 
 @implementation SIPPhoneHomeViewController
 {
+    VideoView *_mainView;
     BOOL _isCallOut;
     LinphoneCall *_currentCall;
     QJLBaseImageView *_bgImage; //  背景图片
@@ -35,12 +37,13 @@
     return self;
 }
 
+#pragma mark    - viewDidLoad
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     
-    [self questData];
+    [self settingNavigationbar];
     [self getView];
     
     //    if (![[SipCoreManager sharedManager] addAccountWithUserName:@"08" password:@"1234" domain:@"192.168.10.104" transport:kFVSIPTransportTcp]) {
@@ -48,34 +51,59 @@
     //    }
 }
 
-- (void)questData {
+#pragma mark    - navigationbar
+- (void)settingNavigationbar {
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(leftAction:)];
     
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@"" titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:17]];
+    self.navigationItem.titleView = label;
 }
+
+//  返回按钮
+- (void)leftAction:(id)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 #pragma mark    - 建立各个view
 - (void)getView {
-//    //  背景图片
-//    _bgImage = [[QJLBaseImageView alloc] initWithImage:[UIImage imageNamed:@"bgImage"]];
-//    [self.view addSubview:_bgImage];
-//    _bgImage.frame = CGRectMake(0, 0, WIDTH, HEIGHT);
-    self.view.backgroundColor = [UIColor lightGrayColor];
     
+//    //  播放视频的view
+//    _videoView = [[QJLBaseView alloc] initWithFrame:CGRectMake(0, 100 * HEI, WIDTH, 200 * HEI)];
+////    _videoView.backgroundColor = [UIColor orangeColor];
+//    [self.view addSubview:_videoView];
+////    _videoView.alpha = 0.5;
+//    
+//    [self createAddressLabel];
+////    [self createSettingButton];
+//    [self createFunctionButton];
+//    
+//    //  返回按钮
+//    QJLBaseButton *button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
+//    [self.view addSubview:button];
+//    [button setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+//    button.frame = CGRectMake(10, 30, 20, 20);
+//    [button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
     
-    //  播放视频的view
-    _videoView = [[QJLBaseView alloc] initWithFrame:CGRectMake(0, 100 * HEI, WIDTH, 200 * HEI)];
-//    _videoView.backgroundColor = [UIColor orangeColor];
-    [self.view addSubview:_videoView];
-//    _videoView.alpha = 0.5;
+    //  新视图
+    _mainView = [[VideoView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT)];
+    [self.view addSubview:_mainView];
+    _mainView.backgroundColor = [UIColor colorWithHex:0xf4f4f4];
     
-    [self createAddressLabel];
-//    [self createSettingButton];
-    [self createFunctionButton];
+    //  截图
+    [_mainView.photoBtn addTarget:self action:@selector(getPhoto) forControlEvents:UIControlEventTouchUpInside];
+    //  接听
+    [_mainView.coverAnswerBtn addTarget:self action:@selector(answer:) forControlEvents:UIControlEventTouchUpInside];
+    //  挂断
+    [_mainView.coverDropBtn addTarget:self action:@selector(drop:) forControlEvents:UIControlEventTouchUpInside];
+    //  解锁
+    [_mainView.coverUnlockBtn addTarget:self action:@selector(unlock:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)screenShot:(id)sender {
     
-    //  返回按钮
-    QJLBaseButton *button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
-    [self.view addSubview:button];
-    [button setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-    button.frame = CGRectMake(10, 30, 20, 20);
-    [button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)handsfeeAction:(id)sender {
     
 }
 
@@ -86,13 +114,11 @@
 }
 
 - (void)createAddressLabel {
-    self.addressTextfield = [[QJLBaseTextfield alloc] initWithFrame:CGRectMake(50 * WID, 25 * HEI, 200 * WID, 50 * HEI)];
-    [self.view addSubview:self.addressTextfield];
-    self.addressTextfield.layer.borderWidth = 0;
-    _addressTextfield.text = @"某某单元";
-    _addressTextfield.enabled = NO;
+    _addressLabel = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:17]];
+    self.navigationItem.titleView = _addressLabel;
 }
 
+/*
 - (void)createFunctionButton {
     self.photoButton = [[QJLBaseButton alloc] initWithFrame:CGRectMake(50 * WID, 325 * HEI, 50 * WID, 50 * HEI)];
     [self.view addSubview:self.photoButton];
@@ -135,9 +161,9 @@
     [_hangupButton setTitle:@"接听" forState:UIControlStateNormal];
     [_hangupButton addTarget:self action:@selector(answerAction:) forControlEvents:UIControlEventTouchUpInside];
 //    _isSelected = 0;
-    
-    
 }
+*/
+
 #pragma mark    -   拍照
 - (void)getPhoto {
 //    //  设置要截屏的图片的大小
@@ -151,7 +177,7 @@
 //    //  保存到相册
 //    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
     
-    CGSize size = _videoView.bounds.size;
+    CGSize size = _mainView.videoview.bounds.size;
     
     UIGraphicsBeginImageContextWithOptions(size, NO, [UIScreen mainScreen].scale);
     CGRect rec = CGRectMake(50 * WID, 100 * HEI, WIDTH - 100 * WID, 200 * HEI);
@@ -182,7 +208,8 @@
     self.tabBarController.tabBar.hidden = YES;
     [super viewWillAppear:animated];
     
-    [_hangupButton setTitle:@"接听" forState:UIControlStateNormal];
+    [self createAddressLabel];
+//    [_hangupButton setTitle:@"接听" forState:UIControlStateNormal];
     // Update on show
     LinphoneCall *call = linphone_core_get_current_call([SipCoreManager getLc]);
     LinphoneCallState state = (call != NULL) ? linphone_call_get_state(call) : 0;
@@ -190,7 +217,7 @@
     
 #pragma mark    - 这里放置视频view
     // Set windows (warn memory leaks)
-    [[SipCoreManager sharedManager] setVideoView:_videoView videoPreview:nil];
+    [[SipCoreManager sharedManager] setVideoView:_mainView.videoview videoPreview:nil];
     
     // Set observer
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -215,12 +242,15 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [self.navigationController setNavigationBarHidden:NO animated:animated];
+    [self drop:nil];
     [super viewWillDisappear:animated];
     
     // Remove observers
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kFVSIPCallUpdate object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kFVSIPCoreUpdate object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kFVSIPRegistrationUpdate object:nil];
+    
+    _addressLabel.text = @" ";
 }
 
 #pragma mark - UI Helpers
@@ -315,6 +345,26 @@
 //    [_acceptCallButton setEnabled:NO];
 //    [_callStatusLabel setText:NSLocalizedString(@"status.in.call", nil)];
 //}
+
+#pragma mark    - 接听
+- (void)answer:(id)sender {
+    [[SipCoreManager sharedManager] acceptCall:_currentCall];
+    [_mainView.answerBtn setEnabled:NO];
+}
+
+#pragma mark    - 挂断
+- (void)drop:(id)sender {
+    [[SipCoreManager sharedManager] hangupCall:_currentCall];
+    _isCallOut = NO;
+}
+
+#pragma mark    - 开锁
+- (void)unlock:(id)sender {
+    [[SipCoreManager sharedManager] sendDtmf:'#'];
+    
+    //  开锁后结束通话, 要有一个延时才能执行该方法
+    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(drop:) userInfo:nil repeats:NO];
+}
 
 - (void)answerAction:(UIButton *)button {
     _isSelected = !_isSelected;
@@ -506,7 +556,10 @@
     {
 //        [_callStatusLabel setText:_isCallOut?NSLocalizedString(@"status.ringing", nil):NSLocalizedString(@"status.call.incoming", nil)];
 //        [_inCallView setHidden:NO];
-        [_addressTextfield setText:[SipCoreManager getRemoteAddressViaCall:_currentCall]];
+        
+//        [_addressTextfield setText:[SipCoreManager getRemoteAddressViaCall:_currentCall]];
+        //  显示地址
+        _addressLabel.text = [SipCoreManager getRemoteAddressViaCall:_currentCall];
     }
     
     if ([UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {

@@ -35,10 +35,18 @@
     
 }
 
+- (void)setArr:(NSMutableArray *)arr {
+    if (_arr != arr) {
+        _arr = arr;
+    }
+    
+    [_tableview reloadData];
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"%ld", indexPath.section);
     SettingModel *model = _arr[indexPath.section][indexPath.row];
-    self.pushView(indexPath.section);
+    self.pushView(indexPath.section, [[UserInformation userinforSingleton].usermodel.APPUserRole integerValue]);
     [UserInformation userinforSingleton].strURL = model.ServicePath;
 //    if (indexPath.section == 4) {
 ////        self.pushView();

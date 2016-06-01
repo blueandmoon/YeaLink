@@ -18,7 +18,7 @@
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    self.navigationController.navigationBar.hidden = YES;
+    self.navigationController.navigationBar.hidden = NO;
     
     [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
     
@@ -33,18 +33,36 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     
-    _button = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-    [_button setTitle:@"设置" forState:UIControlStateNormal];
-    //    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-    [self.view addSubview:_button];
-    [_button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-    [_button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
-    _button.frame = CGRectMake(50 * WID, 25 * HEI, 50 * WID, 30 * HEI);
+    [self settingNavigationbar];
+    
+    __weak SettingWebViewController *blockSelf = self;
+    self.backNative = ^() {
+        [blockSelf.navigationController popViewControllerAnimated:YES];
+    };
 }
 
-- (void)backAction:(id)sender {
-    [self.navigationController popViewControllerAnimated:YES];
+- (void)settingNavigationbar {
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    self.navigationItem.titleView = label;
+    self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
+    self.takeStr = ^(NSString *currentTitle) {
+        label.text = currentTitle;
+    };
+    label.numberOfLines = 0;
+    [label sizeToFit];
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
+    
+    
 }
+
+- (void)back:(id)sender {
+    self.backforH5(self.wv);
+}
+
+//- (void)backAction:(id)sender {
+//    [self.navigationController popViewControllerAnimated:YES];
+//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

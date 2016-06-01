@@ -37,7 +37,7 @@
     [super layoutSubviews];
     
     [self.areaLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.center.equalTo(self.contentView);
+//        make.center.equalTo(self.contentView);
         make.edges.equalTo(self.contentView).with.insets(UIEdgeInsetsMake(5 * HEI, 10 * WID, -5 * HEI, -10 * WID));
     }];
     

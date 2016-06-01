@@ -27,49 +27,78 @@
 
 - (void)createView {
     
-    HomepageCollectionFlowLayout *flowLayout = [[HomepageCollectionFlowLayout alloc] init];
     
+    if (_tempArr.count != 0) {
+    }
+        HomepageCollectionFlowLayout *flowLayout = [[HomepageCollectionFlowLayout alloc] init];
+        
+        flowLayout.itemSize = CGSizeMake(WIDTH / 3, 80 * HEI);
+        
+        flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0); // 四周边距
+        flowLayout.minimumInteritemSpacing = 0;
+        flowLayout.minimumLineSpacing = 0;
+        
+        
+        self.collectionView = [[QJLBaseCollectionView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height) collectionViewLayout:flowLayout];
+        [self addSubview:self.collectionView];
+        self.collectionView.backgroundColor = [UIColor whiteColor];
+        self.collectionView.scrollEnabled = NO;
+        [self.collectionView registerClass:[HomepageCell class] forCellWithReuseIdentifier:@"reuse"];
+        
+        //  签代理
+        self.collectionView.dataSource = self;
+        self.collectionView.delegate = self;
+        
     
-    flowLayout.itemSize = CGSizeMake(WIDTH / 3, 80 * HEI);
-    
-    flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0); // 四周边距
-    flowLayout.minimumInteritemSpacing = 0;
-    flowLayout.minimumLineSpacing = 0;
-    
-    
-    self.collectionView = [[QJLBaseCollectionView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height) collectionViewLayout:flowLayout];
-    [self addSubview:self.collectionView];
-    self.collectionView.backgroundColor = [UIColor whiteColor];
-    self.collectionView.scrollEnabled = NO;
-    [self.collectionView registerClass:[HomepageCell class] forCellWithReuseIdentifier:@"reuse"];
-    
-    //  签代理
-    self.collectionView.dataSource = self;
-    self.collectionView.delegate = self;
     
     
 }
 
+- (void)setTempArr:(NSMutableArray *)tempArr {
+    if (_tempArr != tempArr) {
+        _tempArr = tempArr;
+//        [self createView];
+        [self.collectionView reloadData];
+    }
+}
+
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    ServiceModel *model = self.tempArr[indexPath.row];
-    if (model.SeviceAddress.length != 0) {
-        NSString *str = [NSString stringWithFormat:@"http://%@", model.SeviceAddress];
-        NSLog(@"-----%@", str);
-        [UserInformation userinforSingleton].strURL = str;
-//        //  要先跳转, 再发通知, 才好使
-        self.pushview(str);
-//        [[NSNotificationCenter defaultCenter] postNotificationName:@"nextUrl" object:nil userInfo:@{@"url":str}];
-        NSLog(@"[UserInformation userinforSingleton].strURL: %@", [UserInformation userinforSingleton].strURL);
-        
+    if ([[UserInformation userinforSingleton].usermodel.APPUserRole isEqualToString:@"1"]) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"当前服务只有业主可用" message:nil delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+        alert.delegate = self;
+        [alert show];
     } else {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"对不起" message:@"当前服务未开通" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-        [alertView show];
+        ServiceModel *model = self.tempArr[indexPath.row];
+        if (model.SeviceAddress.length != 0) {
+            NSString *str = [NSString stringWithFormat:@"http://%@", model.SeviceAddress];
+            NSLog(@"-----%@", str);
+            [UserInformation userinforSingleton].strURL = str;
+            //        //  要先跳转, 再发通知, 才好使
+            self.pushview(str);
+            //        [[NSNotificationCenter defaultCenter] postNotificationName:@"nextUrl" object:nil userInfo:@{@"url":str}];
+            NSLog(@"[UserInformation userinforSingleton].strURL: %@", [UserInformation userinforSingleton].strURL);
+            
+        } else {
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"对不起" message:@"当前服务未开通" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+            [alertView show];
+        }
+    }
+    
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex  {
+    if (buttonIndex == 1) {
+        self.pushBindingView();
     }
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
 //        NSLog(@"%@", self.arr);
-    return 6;
+    if (_tempArr.count >= 6) {
+        return 6;
+    } else {
+        return 0;
+    }
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:

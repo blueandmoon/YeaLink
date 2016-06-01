@@ -40,6 +40,7 @@
     
     _tenantCode = tenantCode;
     _username = username;
+    _keyInfos = [NSMutableArray array]; //  初始化数组, 要不在切换账号登陆的时候回导致蛋疼的崩溃
     [_keyInfos removeAllObjects];
     _keyApi = [[WebKeyCaseAPI alloc] initWithSeverAddress:serverAddress
                                                 tokenType:tokenType

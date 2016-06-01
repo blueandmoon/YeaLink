@@ -10,17 +10,24 @@
 
 @implementation CheckFormatTool
 + (BOOL)checkTelNumber:(NSString *)telNumber {
-    NSString * MOBILE = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
-    NSPredicate *regextestMobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBILE];
-    BOOL reg = [regextestMobile evaluateWithObject:telNumber];
-//    if (reg) {
-//        NSLog(@"正确的手机号!");
-//        return YES;
-//    } else {
-//        NSLog(@"手机号码不正确, 请输入正确的手机号");
-//        return NO;
-//    }
-    return [regextestMobile evaluateWithObject:telNumber];
+//    NSString * MOBILE = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
+//    NSPredicate *regextestMobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBILE];
+//    BOOL reg = [regextestMobile evaluateWithObject:telNumber];
+////    if (reg) {
+////        NSLog(@"正确的手机号!");
+////        return YES;
+////    } else {
+////        NSLog(@"手机号码不正确, 请输入正确的手机号");
+////        return NO;
+////    }
+//    return [regextestMobile evaluateWithObject:telNumber];
+    NSString *pattern =@"^1+[3578]+\\d{9}";
+    
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",pattern];
+    
+    BOOL isMatch = [pred evaluateWithObject:telNumber];
+    
+    return isMatch;
 }
 
 + (BOOL)checkPassword:(NSString *)password {

@@ -12,4 +12,6 @@
 
 - (void)createView;
 
++ (instancetype)textfieldCustomWithFrame:(CGRect)frame placeholderText:(NSString *)placeholderText textAlignment:(NSTextAlignment)textAlignment titlecolor:(UIColor *)titlecolor font:(UIFont *)font;
+
 @end

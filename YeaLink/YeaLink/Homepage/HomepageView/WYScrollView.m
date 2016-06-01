@@ -80,7 +80,44 @@
 
 -(instancetype)initWithFrame:(CGRect)frame WithNetImages:(NSArray *)imageArray
 {
-    if (imageArray.count < 2 ) {
+//    if (imageArray.count < 2 ) {
+//        return nil;
+//    }
+    self = [super initWithFrame:frame];
+    if ( self) {
+        if (imageArray.count == 1) {
+            //  当count为1时
+            [self createImageViewWithArr:imageArray];
+        } else if(imageArray.count > 1) {
+            
+            _isNetworkImage = YES;
+            
+            /** 创建滚动view*/
+            [self createScrollView];
+            
+            /** 加入本地image*/
+            [self setImageArray:imageArray];
+            
+            /** 设置数量*/
+            [self setMaxImageCount:_imageArray.count];
+        } else {
+            return nil;
+        }
+        
+    }
+    
+    return self;
+}
+
+- (void)createImageViewWithArr:(NSArray *)array {
+    UIImageView *imageview = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+    [self addSubview:imageview];
+    ServiceModel *model = array[0];
+    [imageview sd_setImageWithURL:[NSURL URLWithString:model.IconPath] placeholderImage:PLACEIMAGE];
+}
+
+- (instancetype)initWithFrames:(CGRect)frame {
+    if (_imageArr.count < 2) {
         return nil;
     }
     self = [super initWithFrame:frame];
@@ -92,7 +129,7 @@
         [self createScrollView];
         
         /** 加入本地image*/
-        [self setImageArray:imageArray];
+        [self setImageArray:_imageArr];
         
         /** 设置数量*/
         [self setMaxImageCount:_imageArray.count];

@@ -64,6 +64,10 @@
  */
 - (instancetype) initWithFrame:(CGRect)frame WithNetImages:(NSArray *)imageArray;
 
+- (instancetype)initWithFrames:(CGRect)frames;
+
+@property(nonatomic, strong)NSMutableArray *imageArr;
+
 @end
 // 版权属于原作者
 // http://code4app.com (cn) http://code4app.net (en)

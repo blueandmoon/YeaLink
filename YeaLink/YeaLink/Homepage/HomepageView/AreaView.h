@@ -7,9 +7,12 @@
 //
 
 #import "QJLBaseView.h"
+#import "AreaModel.h"
 
 @interface AreaView : QJLBaseView
 @property(nonatomic, strong)NSMutableArray *arr;
 @property(nonatomic, strong)QJLBaseTableView *tableView;
+@property(nonatomic, strong)void(^setLeftNavigationItem)(AreaModel *model); //  传值切换城市
+@property(nonatomic, strong)void(^changeCity)(AreaModel *model);
 
 @end

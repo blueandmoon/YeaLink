@@ -22,51 +22,77 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    self.navigationController.navigationBar.hidden = YES;
+    self.navigationController.navigationBar.hidden = NO;
+    self.navigationController.navigationBar.translucent = NO;
     _url = [UserInformation userinforSingleton].strURL;
     [self createWebview];
 //    NSLog(@"_url: %@", _url);
     
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+
+    [super viewWillDisappear:animated];
+    self.navigationController.navigationBar.hidden = NO;
+
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.view.backgroundColor = [UIColor orangeColor];
+    self.view.backgroundColor = [UIColor whiteColor];
     
-    _button = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-    [_button setTitle:@"首页" forState:UIControlStateNormal];
-//    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-    [self.view addSubview:_button];
-    [_button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-    [_button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
+//    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, 25 * HEI)];
+//    [self.view addSubview:view];
+//    view.backgroundColor = [UIColor colorWithHex:0xfefefe];
+    //  禁止webview的弹跳
+//    [(UIScrollView *)[[self.wv subviews] objectAtIndex:0] setBounces:NO];
     
-//    _activView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-//    [self.view addSubview:_activView];
-//    _activView.center = self.view.center;
-//    _activView.color = [UIColor blackColor];
-//    [_activView startAnimating];
+    __weak WebViewController *blockSelf = self;
+    //  返回
+//    self.back = ^() {
+//        [blockSelf.navigationController popToRootViewControllerAnimated:YES];
+//    };
+    [self settingNavigationbar];
+    
+    self.backNative = ^() {
+        [blockSelf.navigationController popViewControllerAnimated:YES];
+    };
+    
 }
 
 - (void)createWebview {
-    NSString *str = [_url substringFromIndex:35];
-    [self getHtmlWithstr:str];
-    _button.frame = CGRectMake(50 * WID, 25 * HEI, 50 * WID, 30 * HEI);
-    
-//    self.bgImageView.hidden = YES;
-//    [_activView stopAnimating];
-//    [_activView setHidesWhenStopped:YES];
+    [self getHtmlWithstr:_url];
     
     [self.hud hide:YES];
 }
 
-- (void)backAction:(QJLBaseButton *)button {
-    [self.navigationController popToRootViewControllerAnimated:YES];
+- (void)settingNavigationbar {
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    self.navigationItem.titleView = label;
+    self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
+    self.takeStr = ^(NSString *currentTitle) {
+        label.text = currentTitle;
+    };
+    label.numberOfLines = 0;
+    [label sizeToFit];
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
+    
+    
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
-    [self.hud hide:YES];
+- (void)back:(id)sender {
+    self.backforH5(self.wv);
 }
+
+- (void)backAction:(id)sender {
+    self.backforH5(self.wv);
+}
+
+//- (void)webViewDidFinishLoad:(UIWebView *)webView {
+//    [self.hud hide:YES];
+//}
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     [self.hud hide:YES];
@@ -77,9 +103,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-    self.navigationController.navigationBar.hidden = NO;
-}
+
 
 /*
 #pragma mark - Navigation

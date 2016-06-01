@@ -16,5 +16,5 @@
 @property(nonatomic, strong)QJLBaseCollectionView *collectionView;
 @property(nonatomic, strong)void(^jumpView)();  //  跳转页面
 @property(nonatomic, strong)void(^pushview)();
-
+@property(nonatomic, strong)void(^pushBindingView)();   //  跳到绑定小区页面
 @end

@@ -11,7 +11,7 @@
 @interface PersonCenterView : QJLBaseView
 @property(nonatomic, strong)QJLBaseTableView *tableview;
 @property(nonatomic, strong)NSMutableArray *arr;
-@property(nonatomic, strong)void(^pushView)(NSInteger section);
+@property(nonatomic, strong)void(^pushView)(NSInteger section, NSInteger userRole);
 @property(nonatomic, strong)void(^jumpView)();
 
 @end

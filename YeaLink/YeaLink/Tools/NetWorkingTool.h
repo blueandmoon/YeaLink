@@ -16,4 +16,6 @@ typedef void(^Block)(id result);
 //  post请求
 + (void)postNetWorkig:(NSString *)strURL bodyStr:(NSString *)bodyStr block:(Block)block;
 
+//  传回接收到的data
++ (void)postNetWorkigDoNothing:(NSString *)strURL bodyStr:(NSString *)bodyStr block:(Block)block;
 @end

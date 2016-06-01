@@ -38,8 +38,16 @@
 }
 
 - (void)settingNavigationbar {
-    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 50 * WID, 30 * HEI) text:@"设置" titleColor:[UIColor blackColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 50 * WID, 30 * HEI) text:@"设置" titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
     self.navigationItem.titleView = label;
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
+}
+
+- (void)back:(id)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+    //  调用刷新数据
+    self.refreshData();
 }
 
 - (void)questData {
@@ -54,15 +62,16 @@
 }
 
 - (void)getView {
+    __weak SettingViewController *blockSelf = self;
     SettingWebViewController *settingVC = [[SettingWebViewController alloc] init];
     _settingview.push = ^() {
 //        NSLog(@"点击了");
-        [self.navigationController pushViewController:settingVC animated:YES];
+        [blockSelf.navigationController pushViewController:settingVC animated:YES];
     };
 }
 
 - (void)createLogOffButton {
-    _logOffButton = [QJLBaseButton buttonCustomFrame:CGRectZero title:@"退出登录" currentTitleColor:[UIColor whiteColor]];
+    _logOffButton = [QJLBaseButton buttonCustomFrame:CGRectZero title:@"切换账号" currentTitleColor:[UIColor whiteColor]];
 //    _logOffButton.layer.borderWidth = 1;
     _logOffButton.layer.cornerRadius = 10;
     [self.view addSubview:_logOffButton];
@@ -79,6 +88,13 @@
 - (void)logOffAction {
     LoginViewController *loginVC = [[LoginViewController alloc] init];
     [self.navigationController pushViewController:loginVC animated:YES];
+    
+    loginVC.afterLoginSuccessToGetHomepageData = ^() {
+        //  切换账号, 要刷新数据
+//        NSLog(@"哈哈哈, 我就不刷新数据, 你能咋地");
+        [self.navigationController popViewControllerAnimated:YES];
+        
+    };
 }
 
 - (void)didReceiveMemoryWarning {

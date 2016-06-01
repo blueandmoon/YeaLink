@@ -38,7 +38,8 @@ extern const UInt8 Aes_KeyTable[16];
     self.sensor.delegate = self;
     
     //  设定密码
-    self.devicePassword = 0x87654321;
+    self.devicePassword = 0x12345678;
+    
 //    NSString *str = @"0x87654321";
 //    self.devicePassword = (UInt32)str.integerValue;
 //    NSString *tempStr = @"231";
@@ -50,14 +51,16 @@ extern const UInt8 Aes_KeyTable[16];
     }
     
     [self getValue];
+    
+    
+    
 }
 #pragma mark    - 各个按钮
 - (void)getValue {
-    _deviceView = [[DeviceView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT)];
+    _deviceView = [[DeviceView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, 205 * HEI)];
     [self.view addSubview:_deviceView];
     _deviceView.backgroundColor = [UIColor whiteColor];
-    [_deviceView.connectBtn addTarget:self action:@selector(SendConnectDevice:) forControlEvents:UIControlEventTouchUpInside];
-    [_deviceView.openDoorBtn addTarget:self action:@selector(openDoorAction:) forControlEvents:UIControlEventTouchUpInside];
+    
 }
 
 - (void)openDoorAction:(id)sender {
@@ -67,8 +70,6 @@ extern const UInt8 Aes_KeyTable[16];
     } else {
         [self SendCloseDoor];
     }
-    NSLog(@"%@", _deviceView.passwordField.text);
-
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -84,6 +85,7 @@ extern const UInt8 Aes_KeyTable[16];
 }
 
 - (void)didDiscoverServicesCallBack:(DHBleResultType)result {
+    NSLog(@"result: %ld", result);
     if(result == DHBLE_RESULT_OK){
 //        tvRecv.text= [tvRecv.text stringByAppendingString:@"Service OK"];
         NSLog(@"Service OK");
@@ -261,26 +263,6 @@ extern const UInt8 Aes_KeyTable[16];
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 #pragma mark - Navigation

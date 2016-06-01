@@ -20,4 +20,11 @@
     return userSingelton;
 }
 
++ (void)saveInformationToLocalWithModel:(UserModel *)model {
+    NSUserDefaults *userdef = [NSUserDefaults standardUserDefaults];
+    [userdef setObject:model.APPUserRole forKey:@"APPUserRole"];
+    [userdef setValue:model.UserID forKey:@"UserID"];
+    [userdef synchronize];
+}
+
 @end

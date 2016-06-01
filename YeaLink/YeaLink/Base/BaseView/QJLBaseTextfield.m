@@ -34,5 +34,18 @@
     
 }
 
++ (instancetype)textfieldCustomWithFrame:(CGRect)frame placeholderText:(NSString *)placeholderText textAlignment:(NSTextAlignment)textAlignment titlecolor:(UIColor *)titlecolor font:(UIFont *)font {
+    QJLBaseTextfield *textfield = [[QJLBaseTextfield alloc] init];
+    textfield.frame = frame;
+    textfield.placeholder = placeholderText;
+    textfield.textAlignment = textAlignment;
+    textfield.textColor = titlecolor;
+    textfield.font = font;
+    
+    //  设置左内边距
+    [textfield setValue:[NSNumber numberWithInt:15] forKey:@"paddingLeft"];
+    textfield.layer.cornerRadius = 5;
+    return textfield;
+}
 
 @end
