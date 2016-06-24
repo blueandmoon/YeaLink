@@ -31,7 +31,8 @@
 }
 
 - (void)createView {
-    
+    [self setValue:[NSNumber numberWithInt:5] forKey:@"paddingLeft"];
+    self.layer.cornerRadius = 5;
 }
 
 + (instancetype)textfieldCustomWithFrame:(CGRect)frame placeholderText:(NSString *)placeholderText textAlignment:(NSTextAlignment)textAlignment titlecolor:(UIColor *)titlecolor font:(UIFont *)font {
@@ -46,6 +47,13 @@
     [textfield setValue:[NSNumber numberWithInt:15] forKey:@"paddingLeft"];
     textfield.layer.cornerRadius = 5;
     return textfield;
+}
+
+#pragma mark    - 改变rightVIew距离右边界的距离
+- (CGRect)rightViewRectForBounds:(CGRect)bounds {
+    CGRect textRect = [super rightViewRectForBounds:bounds];
+    textRect.origin.x -= 10 * WID;
+    return textRect;
 }
 
 @end

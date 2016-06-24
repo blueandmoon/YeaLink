@@ -26,5 +26,6 @@
 @property(nonatomic, strong)QJLBaseButton *coverAnswerBtn;   //  接听
 @property(nonatomic, strong)QJLBaseButton *coverDropBtn; //  挂断
 @property(nonatomic, strong)QJLBaseButton *coverUnlockBtn;   //  开锁
+@property(nonatomic, strong)QJLBaseImageView *coverVideoView;  //  视频view状态图
 
 @end

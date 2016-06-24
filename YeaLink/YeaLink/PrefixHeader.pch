@@ -12,8 +12,13 @@
 // Include any system framework and library headers here that should be included in all compilation units.
 // You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
 
+#ifdef __OBJC__
+
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+
+#endif
+
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
 
@@ -60,8 +65,11 @@
 #import "UIColor+HexColor.h"    //  十六进制颜色值转换
 #import "Photo.h"
 #import "GifView.h"
-
-
+//#import "ObserverKeyboard.h"
+#import "ReportMemory.h"    //  打印内存
+#import "UIImage+Oricon.h"
+#import "UserLocation.h"
+#import "ShareTools.h"
 
 /**
  *  宏
@@ -78,11 +86,26 @@
 #define RIGHT(View, f) make.right.equalTo(View).with.offset(f * WID)  //  右侧约束
 #define Wequal(f) make.width.mas_equalTo(f * WID) //  宽度
 #define Hequal(f) make.height.mas_equalTo(f * HEI)    //  高度
+//
+#define SEGCONTROLCOLOR [UIColor colorWithRed:252 / 255.0 green:105 / 255.0 blue:93 / 255.0 alpha:1]    //  segControl的颜色
+#define BORDERCOLOR [UIColor colorWithRed:209 / 255.0 green:209 / 255.0 blue:209 / 255.0 alpha:1]   //  textfield边框颜色
+#define BGCOLOR [UIColor colorWithRed:221 / 255.0 green:221 / 255.0 blue:221 / 255.0 alpha:1]   //  按钮背景颜色
 //  占位图
 #define PLACEIMAGE [UIImage imageNamed:@"placeholders"]
 //
 #define COMMONURL @"http://wapi.go2family.com/"
 //  自定义颜色
 #define CUSTOMBLUE [UIColor colorWithHex:0x13a3fe]
+
+//  登录注册那里监测textfield值和设置按钮可点击
+#define VALUECHANGE(textfield, button) \
+if (textfield.text.length > 0) {    \
+button.enabled = YES;    \
+button.backgroundColor = SEGCONTROLCOLOR;    \
+} else {    \
+button.enabled = NO; \
+button.backgroundColor = BGCOLOR;    \
+}   \
+
 
 #endif /* PrefixHeader_pch */

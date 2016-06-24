@@ -15,12 +15,15 @@
     size_t index;   //  gif动画播放开始的帧序号
     size_t count;   //  gif 动画的总帧数
     NSTimer *timer; //  播放gif动画所使用的timer;
+    GifView *showGifView;
 }
 
 //  处理gif数据
 - (void)loadData:(NSData *)_data;  
 
 //  将动图加到父视图上
-+ (void)showGifViewWithSuperview:(UIView *)view;
+- (void)showGifViewWithSuperview:(UIView *)view;
+
+- (void)showGifView;
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UserLocation.h"
 
 @interface QJLBaseViewController : UIViewController
 
@@ -15,6 +16,7 @@
 @property(nonatomic,strong)NSMutableArray *dataArrThird;
 @property(nonatomic, strong)BaseProgressHUD *hud; //  菊花朵朵
 @property(nonatomic, strong)QJLBaseImageView *bgImageView;
+
 
 - (void)getView;
 - (void)getValue;

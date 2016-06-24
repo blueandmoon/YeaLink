@@ -22,9 +22,11 @@
 #import "SIPPhoneHomeViewController.h"
 #import "DeviceTableViewController.h"   //  扫描发现的蓝牙设备列表
 #import "BindingCellController.h"   //  绑定小区
+#import "AccessControlController.h" //  门禁开门
 
 #import "SIPLogin.h"
-@interface HomepageViewController ()<WYScrollViewNetDelegate>
+
+@interface HomepageViewController ()<WYScrollViewNetDelegate, CLLocationManagerDelegate>
 
 @property(nonatomic, strong)BaseScrollView *scrollView;
 @property(nonatomic, strong)HomepageView *functionVIew;
@@ -37,14 +39,27 @@
 
 @implementation HomepageViewController
 {
+    CLLocationManager *_locationManager;
     LoginViewController *_loginVC;
     LeftView *_leftview;
     WYScrollView *_wyScrollView;
 }
 
+- (instancetype)init {
+    if (self = [super init]) {
+        
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark    - ViewWillAppear
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    self.navigationController.navigationBar.translucent = NO;
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     self.tabBarController.tabBar.hidden = NO;
 }
@@ -59,6 +74,15 @@
     self.dataArrSecond = [NSMutableArray array];
     self.dataArrThird = [NSMutableArray array];
     
+    //  配合3DTouch跳转页面的, 无后台情况下
+    SIPPhoneHomeViewController *sipVC = [[SIPPhoneHomeViewController alloc] init];
+    DeviceTableViewController *deviceVC = [[DeviceTableViewController alloc] init];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"isFrom3DTouchVideo"] isEqualToString:@"1"]) {
+        [self.navigationController pushViewController:sipVC animated:NO];
+    } else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"isFrom3DTouchBlueTooth"] isEqualToString:@"1"]) {
+        [self.navigationController pushViewController:deviceVC animated:NO];
+    }
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(entranceType:) name:@"entranceType" object:nil];
     
     //  创建视图
     [self createView];
@@ -74,43 +98,39 @@
 #pragma mark    - 自动登录
 - (void)autoLogin {
     __weak HomepageViewController *blockSelf = self;
+    _loginVC = [[LoginViewController alloc] init];
     
+    UINavigationController *loginNaVC = [[UINavigationController alloc] initWithRootViewController:_loginVC];
+    
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"UserName"] == nil) {
+        [self presentViewController:loginNaVC animated:NO completion:NULL];
+    } else {
+        
     //  判断是否登录
     NSString *username = [[NSUserDefaults standardUserDefaults] stringForKey:@"UserName"];
     NSString *password = [[NSUserDefaults standardUserDefaults] stringForKey:@"Password"];
     NSString *strURL = [NSString stringWithFormat:@"%@api/APIUserManage/APPloginByIOS?UserID=%@&PassWord=%@", COMMONURL, username, password];
+    NSLog(@"自动登录接口: %@", strURL);
     [NetWorkingTool getNetWorking:strURL block:^(id result) {
         if ([result[@"code"] isEqualToString:@"1"]) {
             NSLog(@"自动登录成功code: %@", result[@"code"]);
             //  同时登录全视通平台
             [SIPLogin loginSIP];
-            
-            //  接收用户信息
-            //  http://qianjiale.doggadatachina.com/api/APIUserManage/ShowUserInfo?UserID=18112572968
-            NSString *strURL = [NSString stringWithFormat:@"%@api/APIUserManage/ShowUserInfo?UserID=%@", COMMONURL, username];
-            NSLog(@"strURL: %@",strURL);
-            [NetWorkingTool getNetWorking:strURL block:^(id result) {
-                UserInformation *userInfor = [UserInformation userinforSingleton];
-                NSArray *arr = [UserModel baseModelByArray:result[@"list"]];
-                userInfor.usermodel = arr[0];
-                //  存储用户信息到本地
-                [UserInformation saveInformationToLocalWithModel:userInfor.usermodel];
-                NSLog(@"获取用户信息成功");
-                
-                NSLog(@"自动登录成功");
+        
+            [UserInformation questUserInformationWith:username];
+            NSLog(@"自动登录成功");
+            [UserInformation userinforSingleton].doSomething = ^() {
                 //  登录成功, 请求首页数据
                 [self getHomepageData];
-            }];
-        } else {
-            _loginVC = [[LoginViewController alloc] init];
-            [self presentViewController:_loginVC animated:NO completion:^{
-                
-            }];
-            _loginVC.afterLoginSuccessToGetHomepageData = ^() {
-                [blockSelf getHomepageData];
             };
+        } else {
+            [self presentViewController:_loginVC animated:NO completion:NULL];
         }
     }];
+    }
+    _loginVC.afterLoginSuccessToGetHomepageData = ^() {
+        [blockSelf getHomepageData];
+    };
 }
 
 #pragma mark    请求数据
@@ -125,7 +145,6 @@
     NSString *str= [NSString stringWithFormat:@"%@api/APICityManage/GetCity", COMMONURL];
     [NetWorkingTool getNetWorking:str block:^(id result) {
         self.dataArrSecond = [AreaModel baseModelByArray:result[@"list"]];
-//        NSLog(@"%@", self.dataArrSecond);
     }];
 }
 
@@ -166,7 +185,7 @@
     _leftview.tapAction = ^() {
         [blockSelf localclick];
     };
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"door32"] style:UIBarButtonItemStylePlain target:self action:@selector(functionclick:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"doorg-1"] style:UIBarButtonItemStylePlain target:self action:@selector(functionclick:)];
     
     //  会影响导航栏上所有除返回以外的按钮, 执行顺序会有影响
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
@@ -258,19 +277,36 @@
 - (void)getView {
     [self.hud hide:YES];
     
+    
     //  解决block的循环引用警告问题
     __weak HomepageViewController *blockSelf = self;
     
     WebViewController *webVC = [[WebViewController alloc] init];
+    
+    UINavigationController *homeNavi = [[UINavigationController alloc] initWithRootViewController:webVC];
+    
     _functionVIew.pushview = ^(){
-        [blockSelf.navigationController pushViewController:webVC animated:NO];
+        [blockSelf presentViewController:homeNavi animated:YES completion:^{
+            [webVC createWebviewWithURL:[UserInformation userinforSingleton].strURL];
+            
+        }];
+    };
+    
+    AccessControlController *accessVC = [[AccessControlController alloc] init];
+    _functionVIew.pushViewToAccessControl = ^() {
+        [blockSelf.navigationController pushViewController:accessVC animated:YES];
     };
     self.serviceView.jumpView = ^() {
-        [blockSelf.navigationController pushViewController:webVC animated:NO];
+        [blockSelf presentViewController:homeNavi animated:YES completion:^{
+            [webVC createWebviewWithURL:[UserInformation userinforSingleton].strURL];
+        }];
     };
     
     //  跳转到测试账号登录页面
     SIPPhoneHomeViewController *sipVC = [[SIPPhoneHomeViewController alloc] init];
+//    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"isFrom3DTouchVideo"] isEqualToString:@"1"]) {
+//        [self.navigationController pushViewController:sipVC animated:YES];
+//    }
     //  蓝牙页面
     DeviceTableViewController *deviceVC = [[DeviceTableViewController alloc] init];
     _entranceGuardView.jump = ^(NSInteger section) {
@@ -292,6 +328,9 @@
     _functionVIew.pushBindingView = ^(){
         [blockSelf.navigationController pushViewController:bindingVC animated:YES];
     };
+    bindingVC.refreshDataWithSwitchNeighbour = ^() {
+        [UserInformation questUserInformationWith:[UserInformation userinforSingleton].usermodel.UserID];
+    };
     
     _areaView.setLeftNavigationItem = ^(AreaModel *model) {
         _leftview.label.text = model.cityName;
@@ -307,6 +346,18 @@
 
 - (void)didSelectedNetImageAtIndex:(NSInteger)index {
     NSLog(@"index: %ld", index);
+}
+
+#pragma mark    - 接收3DTouch传来的值
+- (void)entranceType:(NSNotification *)notice {
+    SIPPhoneHomeViewController *sipVC = [[SIPPhoneHomeViewController alloc] init];
+    DeviceTableViewController *blueToothVC = [[DeviceTableViewController alloc] init];
+    
+    if ([notice.userInfo[@"type"] isEqualToString:@"com.huize.video"]) {
+        [self.navigationController pushViewController:sipVC animated:YES];
+    } else {
+        [self.navigationController pushViewController:blueToothVC animated:YES];
+    }
 }
 
 /*

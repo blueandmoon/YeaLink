@@ -21,6 +21,11 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.hidden = NO;
+    
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
+        [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
+    }
+
 }
 
 - (void)viewDidLoad {
@@ -28,7 +33,6 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     
-    [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
     
     [self settingNavigationbar];
     

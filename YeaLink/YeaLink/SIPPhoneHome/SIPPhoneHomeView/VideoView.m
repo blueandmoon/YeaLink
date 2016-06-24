@@ -105,6 +105,7 @@
     _HFBtn = [UISpeakerButton buttonWithType:UIButtonTypeCustom];
     [_firstView addSubview:_HFBtn];
     [_HFBtn setSelected:NO];
+    _HFBtn.selected = NO;
     [_HFBtn setImage:[UIImage imageNamed:@"speaker_out"] forState:UIControlStateNormal];
     [_HFBtn setImage:[UIImage imageNamed:@"speaker_in"] forState:UIControlStateSelected];
     [_HFBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -207,53 +208,82 @@
     }];
     
 #pragma mark    - 覆盖视图
-//    _coverPhotoBtn = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@""];
-//    [_firstView addSubview:_coverPhotoBtn];
-//    [_coverPhotoBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.left.equalTo(_photoBtn.mas_left);
-//        make.right.equalTo(_photoBtn.mas_right);
-//        make.top.equalTo(_photoBtn.mas_top);
-//        make.bottom.equalTo(_screenShotLabel.mas_bottom);
-//    }];
-//    
-//    _coverSpeakerBtn = [UIMicroButton buttonWithType:UIButtonTypeCustom];
-//    [_firstView addSubview:_coverSpeakerBtn];
-//    [_coverSpeakerBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.size.equalTo(_coverPhotoBtn);
-//        make.left.equalTo(_speakerBtn.mas_left);
-//        make.top.equalTo(_speakerBtn.mas_top);
-//    }];
-//
-//    _coverHFBtn = [UISpeakerButton buttonWithType:UIButtonTypeCustom];
-//    [_firstView addSubview:_coverHFBtn];
+    _coverPhotoBtn = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
+    [_firstView addSubview:_coverPhotoBtn];
+//    _coverPhotoBtn.backgroundColor = [UIColor orangeColor];
+//    _coverPhotoBtn.enabled = NO;    //  初始禁止点击
+    [_coverPhotoBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.and.top.equalTo(_firstView);
+        make.height.equalTo(_firstView.mas_height);
+        make.width.mas_equalTo(WIDTH / 3);
+    }];
+
+    _coverSpeakerBtn = [UIMicroButton buttonWithType:UIButtonTypeCustom];
+    [_firstView addSubview:_coverSpeakerBtn];
+//    _coverSpeakerBtn.enabled = NO;  //  初始状态禁止点击
+    [_coverSpeakerBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.equalTo(_coverPhotoBtn);
+        make.left.equalTo(_coverPhotoBtn.mas_right);
+        make.top.equalTo(_firstView);
+    }];
+//    _speakerBtn.selected = _coverSpeakerBtn.selected;
+    //  更新话筒按钮的状态
+    [_coverSpeakerBtn addTarget:self action:@selector(click) forControlEvents:UIControlEventTouchUpInside];
+
+    _coverHFBtn = [UISpeakerButton buttonWithType:UIButtonTypeCustom];
+    [_firstView addSubview:_coverHFBtn];
+//    _coverHFBtn.enabled = NO;
+//    _coverHFBtn.selected = NO;
 //    _coverHFBtn.backgroundColor = [UIColor redColor];
-//    [_coverHFBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.size.equalTo(_coverPhotoBtn);
-//        make.left.equalTo(_HFBtn.mas_left);
-//        make.top.equalTo(_HFBtn.mas_top);
-//    }];
+    [_coverHFBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.equalTo(_coverPhotoBtn);
+        make.left.equalTo(_coverSpeakerBtn.mas_right);
+        make.top.equalTo(_firstView);
+    }];
     
     _coverAnswerBtn = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@""];
     [_secondView addSubview:_coverAnswerBtn];
+//    _coverAnswerBtn.enabled = NO;
     [_coverAnswerBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(_answerBtn.mas_left);
-        make.top.and.right.and.bottom.equalTo(_answerLabel);
+        make.left.and.top.equalTo(_secondView);
+        make.width.mas_equalTo(WIDTH / 2);
+        make.height.mas_equalTo(_secondView.mas_height);
     }];
     
     _coverDropBtn = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@""];
     [_secondView addSubview:_coverDropBtn];
+//    _coverDropBtn.enabled = NO;
     [_coverDropBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(_dropBtn.mas_left);
-        make.top.and.right.and.bottom.equalTo(_dropLabel);
+        make.left.equalTo(_coverAnswerBtn.mas_right);
+        make.size.equalTo(_coverAnswerBtn);
+        make.top.equalTo(_secondView);
     }];
     
     _coverUnlockBtn = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@""];
     [_thirdView addSubview:_coverUnlockBtn];
     [_coverUnlockBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(_unlockBtn);
-        make.top.and.right.and.bottom.equalTo(_unlockLabel);
+        make.left.and.top.equalTo(_thirdView);
+        make.height.mas_equalTo(_thirdView.mas_height);
+        make.width.mas_equalTo(_thirdView.mas_width);
     }];
     
+    //  标识视频状态的图
+    _coverVideoView = [[QJLBaseImageView alloc] init];
+    [_videoview addSubview:_coverVideoView];
+    _coverVideoView.image = [UIImage imageNamed:@"no_call_in.jpg"];
+    _coverVideoView.contentMode = UIViewContentModeScaleAspectFill;
+    _coverVideoView.clipsToBounds = YES;
+    _coverVideoView.backgroundColor = [UIColor lightGrayColor];
+    [_coverVideoView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(_videoview);
+        make.left.and.top.equalTo(_videoview);
+    }];
+    
+}
+
+- (void)click {
+    NSLog(@"%d", _coverSpeakerBtn.selected);
+    _speakerBtn.selected = _coverSpeakerBtn.selected;
 }
 
 @end

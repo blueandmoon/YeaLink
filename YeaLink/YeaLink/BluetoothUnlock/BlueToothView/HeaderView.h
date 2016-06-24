@@ -15,6 +15,4 @@
 @property(nonatomic, strong)QJLBaseLabel *label;
 @property(nonatomic, strong)QJLBaseButton *button;
 
-//- (void)scanAppDevices:(id)sender;
-
 @end

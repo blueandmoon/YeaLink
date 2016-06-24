@@ -7,7 +7,6 @@
 //
 
 #import "DeviceTableViewController.h"
-#import "BlueToothUnlockController.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import "QuartzCore/QuartzCore.h"
 #import "DeviceView.h"
@@ -20,8 +19,10 @@
 
 @implementation DeviceTableViewController
 {
-    BOOL isScaning;
-    NSTimer *_delayTimer;
+    NSInteger btIndex;  //  蓝牙设备下标
+    BOOL isLooping;
+//    BOOL isScaning;
+//    NSTimer *_delayTimer;
     NSTimer *_timer;
     HeaderView *_headerView;
     DeviceView *_deviceView;
@@ -30,17 +31,25 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     self.tabBarController.tabBar.hidden = YES;
-//    [self gonext];
     
-}
+    //  是否处于循环连接中
+    isLooping = NO;
+    btIndex = 0;
+    
+    //  3DTouch
+    [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"isFrom3DTouchBlueTooth"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 
-//- (void)gonext {
-//    [self scanAppDevices];
-//    
-//}
+    double delayTime = 0.1; //  不延时执行不好使, 蛋的
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        //  进来就扫描
+        [self scanAppDevices];
+    });
+}
 
 - (void)viewWillDisappear:(BOOL)animated {
     [_timer invalidate];
+    
 }
 
 - (void)viewDidLoad {
@@ -67,8 +76,8 @@
         make.width.equalTo(self.view);
         make.centerX.equalTo(self.view);
     }];
-    
-    
+    //  开锁按钮
+    [_deviceView.button addTarget:self action:@selector(openDoor) forControlEvents:UIControlEventTouchUpInside];
     
     
     _sensor = [[DHBle alloc] init];
@@ -96,15 +105,10 @@
  
     [self createTableView];
     
-//    _timer =  [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(gonext) userInfo:nil repeats:NO];
-//    [_timer fire];
-    
-    
-    
 }
 
 - (void)settingNavigationbar {
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Scan" style:UIBarButtonItemStylePlain target:self action:@selector(scanAppDevices)];
+//    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Scan" style:UIBarButtonItemStylePlain target:self action:@selector(scanAppDevices)];
     self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
     self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
     
@@ -129,14 +133,10 @@
     _btAppTableView.bounces = NO;
 }
 
-#pragma mark    - UITableViewDelegate
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.peripheralViewControllerArray count];
-}
-
+/*
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSUInteger row = [indexPath row];
-//    BlueToothUnlockController *btController = [_peripheralViewControllerArray objectAtIndex:row];
+    //    NSUInteger row = [indexPath row];
+    //    BlueToothUnlockController *btController = [_peripheralViewControllerArray objectAtIndex:row];
     
     CBPeripheral *peripheral = _peripheralViewControllerArray[indexPath.row];
     if (_sensor.activePeripheral && _sensor.activePeripheral != peripheral) {
@@ -150,13 +150,20 @@
         _sensor.activePeripheral = _peripheral;
         [self.sensor connectDevice:_sensor.activePeripheral];
     }
-    //  开锁按钮
-    [_deviceView.button addTarget:self action:@selector(openDoor) forControlEvents:UIControlEventTouchUpInside];
+    
     
     self.navigationItem.rightBarButtonItem.title = @"Scan";
     
-//    [self openDoor];
+    //    [self openDoor];
 }
+ */
+ 
+
+#pragma mark    - UITableViewDelegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.peripheralViewControllerArray count];
+}
+
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *cellId = @"peripheral";
@@ -169,7 +176,9 @@
 //    NSUInteger row = indexPath.row;
 //    BlueToothUnlockController *controller = [_peripheralViewControllerArray objectAtIndex:row];
 //    CBPeripheral *peripheral = [controller peripheral];
-    CBPeripheral *peripheral = self.peripheral;
+    
+    CBPeripheral *peripheral = [_peripheralViewControllerArray objectAtIndex:indexPath.row];
+//    CBPeripheral *peripheral = self.peripheral;
     cell.titleLabel.text = [_sensor getDeviceName:peripheral];
     
 //    cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
@@ -187,22 +196,29 @@
 
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 40 * HEI;
+    return 50 * HEI;
 }
 
-
-
-#pragma mark    - 搬迁过来的
+#pragma mark    - 开锁
 - (void)openDoor {
-//    NSLog(@"%@", self.navigationItem.rightBarButtonItem.title);
-    if (isScaning == 0) {
-        if(_sensor.activePeripheral.state != CBPeripheralStateConnected){
-            _sensor.activePeripheral = _peripheral;
-            [self.sensor connectDevice:_sensor.activePeripheral];
-        } else {
-            [self SendCloseDoor];
-        }        
+    isLooping = YES;
+    //  循环遍历连接设备开锁
+//    for (NSInteger i = 0; i < _peripheralViewControllerArray.count; i++) {
+//        _peripheral = _peripheralViewControllerArray[i];
+//        _sensor.activePeripheral = _peripheral;
+//        [self SendConnectDevice:nil];
+//    }
+    _peripheral = _peripheralViewControllerArray[btIndex];
+    _sensor.activePeripheral = _peripheral;
+    
+    
+    if(_sensor.activePeripheral.state != CBPeripheralStateConnected){
+        _sensor.activePeripheral = _peripheral;
+        [self.sensor connectDevice:_sensor.activePeripheral];
+    } else {
+        [self SendOpenDoor];
     }
+  
 }
 
 //  发现设备
@@ -226,7 +242,7 @@
 - (void)didDiscoverCharacteristicsCallBack:(DHBleResultType)result {
     NSLog(@"%@", _sensor.activePeripheral);
     if(result == DHBLE_RESULT_OK){
-        NSString *value = [NSString stringWithFormat:@"Charact OK"];
+//        NSString *value = [NSString stringWithFormat:@"Charact OK"];
         NSLog(@"Charact OK!");
         //        tvRecv.text= [tvRecv.text stringByAppendingString:value];
         if(_sensor.activePeripheral.state == CBPeripheralStateConnected){
@@ -270,8 +286,6 @@
 #if 1
     if(_sensor.activePeripheral.state == CBPeripheralStateConnected){
         [_sensor openDevice:_sensor.activePeripheral deviceNum:[_sensor getDeviceId:_sensor.activePeripheral] devicePassword:0x12345678];
-//        NSLog(@"sensor.activePeripheral: %@, devicePassword: %u", _sensor.activePeripheral, (unsigned int)_devicePassword);
-        /*[sensor openDeviceUserId:sensor.activePeripheral deviceNum:[sensor getDeviceId:sensor.activePeripheral] devicePassword:0x12345678 userId:0x11223344];*/
     }
     else{
         //[self.navigationController popViewControllerAnimated:YES];
@@ -288,6 +302,18 @@
     {
         //        tvRecv.text= [tvRecv.text stringByAppendingString:@"success"];
         NSLog(@"unlock Success!");
+        
+        if (_peripheral == _peripheralViewControllerArray[_peripheralViewControllerArray.count - 1]) {
+            btIndex = 0;
+            isLooping = NO;
+        } else {
+            btIndex += 1;
+            _peripheral = _peripheralViewControllerArray[btIndex];
+            _sensor.activePeripheral = _peripheral;
+            [self SendConnectDevice:nil];
+        }
+        
+        
         //  成功就切换图片
         [_deviceView.button setImage:[UIImage imageNamed:@"unlock_success"] forState:UIControlStateNormal];
     }
@@ -299,7 +325,11 @@
         
         [_deviceView.button setImage:[UIImage imageNamed:@"unlock_fail"] forState:UIControlStateNormal];
     }
-    _delayTimer = [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(exchangeImage:) userInfo:nil repeats:NO];
+    
+    double delayTime = 3.0;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self exchangeImage:nil];
+    });
     
 }
 
@@ -307,15 +337,31 @@
     [_deviceView.button setImage:[UIImage imageNamed:@"blueToothImage"] forState:UIControlStateNormal];
 }
 
+#pragma mark    - 连接设备
 - (void)SendConnectDevice:(id)sender {
     if(_sensor.activePeripheral.state != CBPeripheralStateConnected){
         _sensor.activePeripheral = _peripheral;
         [self.sensor connectDevice:_sensor.activePeripheral];
+        
+        if (isLooping == YES) {
+            [self SendOpenDoor];
+        }
     }
 }
 
 - (void)connectDeviceCallBack:(DHBleResultType)result {
-    NSLog(@"%@", _sensor.activePeripheral);
+    if (result == DHBLE_RESULT_OK) {
+        NSLog(@"蓝牙连接成功");
+        _deviceView.button.enabled = YES;
+        
+        if (isLooping == YES) {
+            [self SendOpenDoor];
+        }
+    } else {
+        _deviceView.button.enabled = NO;
+        NSLog(@"蓝牙连接失败");
+    }
+//    NSLog(@"%@", _sensor.activePeripheral);
     //    CFStringRef s = CFUUIDCreateString(kCFAllocatorDefault, (__bridge CFUUIDRef )_sensor.activePeripheral.identifier);
     //    BLKAppUUID.text = (__bridge NSString*)s;
     //    tvRecv.text = @"OK+CONN";
@@ -323,17 +369,17 @@
 
 - (void)disconnectDeviceCallBack {
     if(_sensor.activePeripheral.state != CBPeripheralStateConnected){
-        _sensor.activePeripheral = _peripheral;
+        _sensor.activePeripheral = _peripheral; //  失去连接就继续连
         [self.sensor connectDevice:_sensor.activePeripheral];
     }
     NSLog(@"OK+LOST");
 }
 
-- (void)SendCloseDoor {
-    //[self setDevicePassword:0x87654321];
-    [_sensor closeDevice:_sensor.activePeripheral deviceNum:[_sensor getDeviceId:_sensor.activePeripheral] devicePassword:[self devicePassword]];
-    
-}
+//- (void)SendCloseDoor {
+//    //[self setDevicePassword:0x87654321];
+////    [_sensor closeDevice:_sensor.activePeripheral deviceNum:[_sensor getDeviceId:_sensor.activePeripheral] devicePassword:[self devicePassword]];
+//    [_sensor openDevice:_sensor.activePeripheral deviceNum:[_sensor getDeviceId:_sensor.activePeripheral] devicePassword:[self devicePassword]];
+//}
 
 #pragma mark    - BLKAppSensorDelegate
 -(void)sensorReady
@@ -341,14 +387,22 @@
     //TODO: it seems useless right now.
 }
 
+#pragma mark    - 扫描反馈结果, 存入数组
 - (void)scanDeviceCallBack:(CBPeripheral *)peripheral RSSI:(int)level {
 //    BlueToothUnlockController *controller = [[BlueToothUnlockController alloc] init];
 //    controller.peripheral = peripheral;
 //    controller.sensor = _sensor;
     
-    self.peripheral = peripheral;
-    [_peripheralViewControllerArray addObject:self.peripheral];
+//    self.peripheral = peripheral;
+    [_peripheralViewControllerArray addObject:peripheral];
     [_btAppTableView reloadData];
+    
+    //  扫描后, 先连接第一个设备
+    _peripheral = _peripheralViewControllerArray[0];
+    _sensor.activePeripheral = _peripheral;
+    [_sensor connectDevice:_sensor.activePeripheral];
+    
+    NSLog(@"_peripheralViewControllerArray.count: %ld", _peripheralViewControllerArray.count);
 }
 
 - (void)scanDeviceEndCallBack {
@@ -371,6 +425,7 @@
             break;
         case 4:
             /* 尚未打开蓝牙，请在设置中打开…… */
+            NSLog(@"尚未打开蓝牙，请在设置中打开…… ");
             break;
         case 5:
             /* 蓝牙已经成功开启，稍后…… */
@@ -381,6 +436,7 @@
 
 }
 
+#pragma mark    - 扫描设备
 - (void)scanAppDevices{
     if ([_sensor activePeripheral]) {
         if (_sensor.activePeripheral.state == CBPeripheralStateConnected) {
@@ -397,25 +453,22 @@
     
     _sensor.delegate = self;
     NSLog(@"now we are searching device...\n");
-    self.navigationItem.rightBarButtonItem.title = @"Scaning";
-    isScaning = 1;
-    [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(scanTimer:) userInfo:nil repeats:NO];
+//    self.navigationItem.rightBarButtonItem.title = @"Scaning";
+//    isScaning = 1;
+//    [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(scanTimer:) userInfo:nil repeats:NO];
     
     [_sensor scanDevice:5];
     
 }
 
-- (void)scanTimer:(NSTimer *)timer {
-    self.navigationItem.rightBarButtonItem.title = @"Scan";
-    isScaning = 0;
-    [_btAppTableView reloadData];
-//    [self gonext];
-}
+//- (void)scanTimer:(NSTimer *)timer {
+//    self.navigationItem.rightBarButtonItem.title = @"Scan";
+//    isScaning = 0;
+//    [_btAppTableView reloadData];
+//}
 
 - (void)backAction:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:^{
-        
-    }];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)didReceiveMemoryWarning {

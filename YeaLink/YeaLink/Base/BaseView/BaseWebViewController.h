@@ -33,7 +33,10 @@ typedef void (^BLOCK)();
 @property(nonatomic, strong)void(^backforH5)(UIWebView *);  //  执行webview页面的返回操作
 @property(nonatomic, strong)BLOCK backNative;   //  返回native页面
 @property(nonatomic, strong)void(^changeShowLeftButton)(NSString *); //  改变展示的左按钮, show代表秀场, find代码发现, news代表消息的主页面
-//@property(nonatomic, strong)QJLBaseImageView *imageview;    //  图
+@property(nonatomic, strong)void(^refreshDataWhenchangeCell)(); //  当业主把绑定的小区都删了, 变成个人用户时
+@property(nonatomic, strong)UserLocation *userloc;  //  定位
+@property(nonatomic, strong)void(^takeUserLocation)();  //  给js传递用户位置
+@property(nonatomic, strong)void(^share)(); //  分享
 
 - (void)getHtmlWithstr:(NSString *)str;
 

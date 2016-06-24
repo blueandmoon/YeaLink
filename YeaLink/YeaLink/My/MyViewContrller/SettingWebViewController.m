@@ -57,12 +57,20 @@
 }
 
 - (void)back:(id)sender {
+    __weak SettingWebViewController *blockSelf = self;
+    //  h5页面的返回
+    self.backforH5 = ^(UIWebView *webview) {
+        NSString *Str = [webview stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"gotoPre();"]];
+        NSLog(@"jsStr: %@", Str);
+        if ([Str isEqualToString:@"a"] || [Str isEqualToString:@"b"]) {
+            //            NSLog(@"我该怎么返回!");
+        } else {
+            //  返回native
+            blockSelf.backNative();
+        }
+    };
     self.backforH5(self.wv);
 }
-
-//- (void)backAction:(id)sender {
-//    [self.navigationController popViewControllerAnimated:YES];
-//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

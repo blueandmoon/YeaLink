@@ -50,10 +50,15 @@
     }
     if (indexPath.row == 0) {
         cell.switchButton.hidden = NO;
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"switchStatus"] == nil) {
+            [self sendDefaultStatusWith:cell.switchButton.on];
+        }
+        [cell.switchButton addTarget:self action:@selector(valueChange:) forControlEvents:UIControlEventValueChanged];
+//        [cell.switchButton addTarget:self action:@selector(switchClick:) forControlEvents:UIControlEventTouchUpInside];
     }
     
     cell.titleLabel.text = _arr[indexPath.row];
-//    NSLog(@"%@", _arr[indexPath.row]);
+    
     return cell;
 }
 
@@ -73,8 +78,28 @@
         _push();
     }
     
+}
+
+- (void)sendDefaultStatusWith:(BOOL)switchStatus {
+//    /api/APIUserManage/SetNoticePush?UserID=18627820357&IsPush=1
+    NSString *tempStr = [NSString stringWithFormat:@"%@/api/APIUserManage/SetNoticePush?UserID=%@&IsPush=%d", COMMONURL, [UserInformation userinforSingleton].usermodel.UserID, switchStatus];
+    NSLog(@"%@", tempStr);
+    [NetWorkingTool getNetWorking:tempStr block:^(id result) {
+//        NSLog(@"code: %@", result[@"code"]);
+        if (![result[@"code"] isEqualToString:@"1"]) {
+            UIAlertView *aler = [[UIAlertView alloc] initWithTitle:result[@"text"] message:nil delegate:self cancelButtonTitle:@"YES" otherButtonTitles:nil, nil];
+            [aler show];
+        }
+    }];
     
 }
+
+- (void)valueChange:(UISwitch *)switchBtn {
+//    NSLog(@"switchBtn.on: %d", switchBtn.on);
+    [self sendDefaultStatusWith:switchBtn.on];
+    
+}
+
 
 /*
 // Only override drawRect: if you perform custom drawing.

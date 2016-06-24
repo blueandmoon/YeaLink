@@ -9,8 +9,5 @@
 #import "QJLBaseViewController.h"
 
 @interface ForgetPasswordViewController : QJLBaseViewController
-/**
- *  暂时无用, 放着
- */
 
 @end

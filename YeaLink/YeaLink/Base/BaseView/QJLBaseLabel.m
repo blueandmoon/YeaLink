@@ -21,7 +21,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.text = @"label";
+//        self.text = @"label";
 //        self.layer.borderWidth = 1;
         
         [self createView];

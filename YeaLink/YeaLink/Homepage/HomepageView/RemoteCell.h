@@ -12,5 +12,4 @@
 @property(nonatomic, strong)QJLBaseImageView *iconImageView;
 @property(nonatomic, strong)QJLBaseLabel *doorLabel;
 
-
 @end

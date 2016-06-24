@@ -11,6 +11,7 @@
 @interface WebViewController ()<UIWebViewDelegate>
 //@property(nonatomic, strong)UIWebView *wv;
 @property(nonatomic, strong)QJLBaseButton *button;
+@property(nonatomic, strong)QJLBaseLabel *label;
 
 @end
 
@@ -20,13 +21,22 @@
 //    UIActivityIndicatorView *_activView;
 }
 
+- (instancetype)init {
+    if (self = [super init]) {
+
+    }
+    return self;
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.hidden = NO;
     self.navigationController.navigationBar.translucent = NO;
+    
     _url = [UserInformation userinforSingleton].strURL;
-    [self createWebview];
-//    NSLog(@"_url: %@", _url);
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
+        [self createWebview];
+    }
     
 }
 
@@ -34,6 +44,10 @@
 
     [super viewWillDisappear:animated];
     self.navigationController.navigationBar.hidden = NO;
+    
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
+        _label.text = nil;
+    }
 
 }
 
@@ -49,33 +63,36 @@
 //    [(UIScrollView *)[[self.wv subviews] objectAtIndex:0] setBounces:NO];
     
     __weak WebViewController *blockSelf = self;
-    //  返回
-//    self.back = ^() {
-//        [blockSelf.navigationController popToRootViewControllerAnimated:YES];
-//    };
+
     [self settingNavigationbar];
     
     self.backNative = ^() {
-        [blockSelf.navigationController popViewControllerAnimated:YES];
+        [blockSelf dismissViewControllerAnimated:YES completion:nil];
     };
+    
     
 }
 
 - (void)createWebview {
     [self getHtmlWithstr:_url];
     
-    [self.hud hide:YES];
+}
+
+- (void)createWebviewWithURL:(NSString *)strURL {
+    [self getHtmlWithstr:strURL];
+    
 }
 
 - (void)settingNavigationbar {
-    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
-    self.navigationItem.titleView = label;
+    __weak WebViewController *blockSelf = self;
+    _label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@" " titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    self.navigationItem.titleView = _label;
     self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
     self.takeStr = ^(NSString *currentTitle) {
-        label.text = currentTitle;
+        blockSelf.label.text = currentTitle;
     };
-    label.numberOfLines = 0;
-    [label sizeToFit];
+    _label.numberOfLines = 0;
+    [_label sizeToFit];
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
     
@@ -83,19 +100,18 @@
 }
 
 - (void)back:(id)sender {
+    __weak WebViewController *blockSelf = self;
+    self.backforH5 = ^(UIWebView *webview) {
+        NSString *Str = [webview stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"gotoPre();"]];
+        NSLog(@"jsStr: %@", Str);
+        if ([Str isEqualToString:@"a"] || [Str isEqualToString:@"b"]) {
+            //            NSLog(@"我该怎么返回!");
+        } else {
+            //  返回native
+            blockSelf.backNative();
+        }
+    };
     self.backforH5(self.wv);
-}
-
-- (void)backAction:(id)sender {
-    self.backforH5(self.wv);
-}
-
-//- (void)webViewDidFinishLoad:(UIWebView *)webView {
-//    [self.hud hide:YES];
-//}
-
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    [self.hud hide:YES];
 }
 
 - (void)didReceiveMemoryWarning {

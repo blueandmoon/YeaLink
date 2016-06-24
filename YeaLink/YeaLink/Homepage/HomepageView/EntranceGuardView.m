@@ -72,23 +72,6 @@
     
 }
 
-//- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-//    return 2;
-//}
-
-//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-//    switch (section) {
-//        case 0: {
-//            return @"蓝牙门禁";
-//        }   break;
-//        case 1: {
-//            return @"远程门禁";
-//        }   break;
-//        default:
-//            return @"错误";
-//            break;
-//    }
-//}
 
 
 

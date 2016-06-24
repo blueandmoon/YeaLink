@@ -20,21 +20,15 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.hidden = NO;
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
+        [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
+    }
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-//    _btn = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-//    [_btn setTitle:@"秀场" forState:UIControlStateNormal];
-//    //    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-//    _btn.frame = CGRectMake(50 * WID, 25 * HEI, 50 * WID, 30 * HEI);
-//    [self.view addSubview:_btn];
-//    [_btn setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-//    [_btn addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
     [self settingNavigationbar];
     
 }
@@ -58,12 +52,6 @@
 
 - (void)back:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
-}
-
-- (void)backAction:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:^{
-        
-    }];
 }
 
 - (void)didReceiveMemoryWarning {

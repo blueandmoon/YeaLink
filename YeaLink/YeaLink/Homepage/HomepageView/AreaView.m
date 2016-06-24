@@ -83,7 +83,6 @@
 - (void)saveDefaultCityWith:(AreaModel *)model {
     //  判断点击的城市不是当前城市, 先判断是否存储过cityid, 若无, 则是第一次, 则~
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"cityID"] != nil) {
-        
         if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"cityID"] isEqualToString:model.cityID]) {
             [self saveInfoWithModel:model];
         }
@@ -97,10 +96,10 @@
     NSUserDefaults *userdef = [NSUserDefaults standardUserDefaults];
     [userdef setObject:model.cityName forKey:@"cityName"];
     [userdef setObject:model.cityID forKey:@"cityID"];
-    //    //  用单例存储用户所选城市
-    //    [UserInformation userinforSingleton].cityID = model.cityID;
-    //    [UserInformation userinforSingleton].cityName = model.cityName;
     [userdef synchronize];
+        //  用单例存储用户所选城市
+//    [UserInformation userinforSingleton].cityID = model.cityID;
+//    [UserInformation userinforSingleton].cityName = model.cityName;
     //    NSLog(@"%@", NSHomeDirectory());
     //  设置导航栏左按钮的标题
     self.setLeftNavigationItem(model);

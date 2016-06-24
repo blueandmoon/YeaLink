@@ -11,4 +11,7 @@
 @interface WebViewController : BaseWebViewController
 @property(nonatomic, strong)NSString *strURL;
 
+
+- (void)createWebviewWithURL:(NSString *)strURL;
+
 @end

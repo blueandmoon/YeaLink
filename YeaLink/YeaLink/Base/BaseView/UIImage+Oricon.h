@@ -10,7 +10,7 @@
 
 @interface UIImage (Oricon)
 
-- (UIImage *)originImage:(UIImage *)image scaleToSize:(CGSize)size;
++ (UIImage *)originImage:(UIImage *)image scaleToSize:(CGSize)size;
 
 
 @end

@@ -9,12 +9,12 @@
 #import "LoginViewController.h"
 #import "RegisterViewController.h"
 #import "ForgetPasswordViewController.h"
-#import "ForgetViewController.h"
 #import "SIPLogin.h"
 
-@interface LoginViewController ()<UITextFieldDelegate>
-//@property(nonatomic, strong)QJLBaseButton *returnButton;
-//@property(nonatomic, strong)QJLBaseButton *userButton;
+#define LDISTANCE 25 * WID
+#define HDISTANCE 25 * HEI
+
+@interface LoginViewController ()<UITextFieldDelegate, UIAlertViewDelegate>
 @property(nonatomic, strong)QJLBaseTextfield *phoneNumberTextfield; //  手机号
 @property(nonatomic, strong)QJLBaseTextfield *passwordTextfield;    //  密码
 @property(nonatomic, strong)QJLBaseButton *loginButton; //  登录
@@ -26,77 +26,119 @@
 
 @implementation LoginViewController
 
+- (instancetype)init {
+    if (self = [super init]) {
+        
+    }
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     
+    [self setNavigationbar];
     [self getView];
     
 }
 
+- (void)setNavigationbar {
+    self.navigationController.navigationBar.translucent = NO;
+    
+    self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
+    QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 50, 30) text:@"登录" titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
+    self.navigationItem.titleView = label;
+    
+}
+
 - (void)getView {
-    _phoneNumberTextfield = [[QJLBaseTextfield alloc] initWithFrame:CGRectMake(25 * WID, 125 * HEI, WIDTH - 50 * WID, 50 * HEI)];
+    _phoneNumberTextfield = [[QJLBaseTextfield alloc] init];
     [self.view addSubview:_phoneNumberTextfield];
-    _phoneNumberTextfield.placeholder = @"          请输入手机号";
-//    _phoneNumberTextfield.backgroundColor = [UIColor colorWithRed:220 / 255.0 green:223 / 255.0 blue:169 / 255.0 alpha:1];
-    
-    _phoneNumberTextfield.layer.borderColor = [UIColor colorWithRed:209 / 255.0 green:209 / 255.0 blue:209 / 255.0 alpha:1].CGColor;
+    _phoneNumberTextfield.placeholder = @"请输入手机号";
+    _phoneNumberTextfield.layer.borderColor = BORDERCOLOR.CGColor;
     _phoneNumberTextfield.delegate = self;
-    _phoneNumberTextfield.tag = 1;
+    _phoneNumberTextfield.tag = 1000;
+    [_phoneNumberTextfield mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view).with.offset(LDISTANCE);
+        make.right.equalTo(self.view).with.offset(-LDISTANCE);
+        make.top.equalTo(self.view).with.offset(HDISTANCE);
+        make.height.mas_equalTo(50 * HEI);
+    }];
     
-    _passwordTextfield = [[QJLBaseTextfield alloc] initWithFrame:CGRectMake(25 * WID, 200 * HEI, WIDTH - 50 * HEI, 50 * HEI)];
+    _passwordTextfield = [[QJLBaseTextfield alloc] init];
     [self.view addSubview:_passwordTextfield];
-    _passwordTextfield.placeholder = @"         请输入密码";
+    _passwordTextfield.placeholder = @"请输入密码";
     _passwordTextfield.delegate= self;
-    _passwordTextfield.tag= 2;
-    _passwordTextfield.layer.borderColor = [UIColor colorWithRed:209 / 255.0 green:209 / 255.0 blue:209 / 255.0 alpha:1].CGColor;
+    _passwordTextfield.tag= 1001;
+    _passwordTextfield.layer.borderColor = BORDERCOLOR.CGColor;
     _passwordTextfield.secureTextEntry = YES;
+    [_passwordTextfield mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.and.centerX.equalTo(_phoneNumberTextfield);
+        make.top.equalTo(_phoneNumberTextfield.mas_bottom).with.offset(HDISTANCE);
+    }];
+    [_passwordTextfield addTarget:self action:@selector(textChange) forControlEvents:UIControlEventAllEditingEvents];
     
     _loginButton = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-    _loginButton.frame = CGRectMake(25 * WID, 275 * HEI, WIDTH - 50 * WID, 50 * HEI);
     [_loginButton setTitle:@"登录" forState:UIControlStateNormal];
     [self.view addSubview:_loginButton];
     [_loginButton setTitleColor:[UIColor colorWithRed:132 / 255.0 green:132 / 255.0 blue:132 / 255.0 alpha:1] forState:UIControlStateNormal];
-    _loginButton.backgroundColor = [UIColor colorWithRed:221 / 255.0 green:221 / 255.0 blue:221 / 255.0 alpha:1];
-    _loginButton.layer.cornerRadius = 10;
+    _loginButton.backgroundColor = BGCOLOR;
+    _loginButton.layer.cornerRadius = 5;
+    _loginButton.enabled = NO;
+    [_loginButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.and.centerX.equalTo(_phoneNumberTextfield);
+        make.top.equalTo(_passwordTextfield.mas_bottom).with.offset(HDISTANCE);
+    }];
     [_loginButton addTarget:self action:@selector(loginAction:) forControlEvents:UIControlEventTouchUpInside];
-    
-    _IRegisterBUtton = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-    _IRegisterBUtton.frame= CGRectMake(107 * WID, 375 * HEI, 75 * WID, 30 * HEI);
-    [self.view addSubview:_IRegisterBUtton];
-    [_IRegisterBUtton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-    [_IRegisterBUtton setTitle:@"我要注册" forState:UIControlStateNormal];
-    _IRegisterBUtton.font = [UIFont systemFontOfSize:15];
-    [_IRegisterBUtton addTarget:self action:@selector(registerAction:) forControlEvents:UIControlEventTouchUpInside];
     
     _segmentView = [[QJLBaseView alloc] initWithFrame:CGRectMake(187 * WID, 375 * HEI, 1 * WID, 30 * HEI)];
     [self.view addSubview:_segmentView];
-    _segmentView.layer.borderColor = [UIColor redColor].CGColor;
+    _segmentView.layer.borderColor = BORDERCOLOR.CGColor;
     _segmentView.layer.borderWidth = 2;
+    [_segmentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(_phoneNumberTextfield);
+        make.top.equalTo(_loginButton.mas_bottom).with.offset(HDISTANCE);
+        make.size.mas_equalTo(CGSizeMake(1 * WID, 30 * HEI));
+    }];
+
+    _IRegisterBUtton = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
+//    _IRegisterBUtton.frame= CGRectMake(107 * WID, 375 * HEI, 75 * WID, 30 * HEI);
+    [self.view addSubview:_IRegisterBUtton];
+    [_IRegisterBUtton setTitleColor:[UIColor colorWithRed:252 / 255.0 green:105 / 255.0 blue:93 / 255.0 alpha:1] forState:UIControlStateNormal];
+    [_IRegisterBUtton setTitle:@"我要注册" forState:UIControlStateNormal];
+    _IRegisterBUtton.font = [UIFont systemFontOfSize:15];
+    [_IRegisterBUtton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(_segmentView.mas_left).with.offset(-5 * WID);
+        make.centerY.equalTo(_segmentView);
+        make.size.mas_equalTo(CGSizeMake(85 * WID, 30 * HEI));
+    }];
+    [_IRegisterBUtton addTarget:self action:@selector(registerAction:) forControlEvents:UIControlEventTouchUpInside];
+    
     
     _forgetPasswordButton = [QJLBaseButton buttonWithType:UIButtonTypeSystem];
-    _forgetPasswordButton.frame= CGRectMake(193 * WID, 375 * HEI, 85 * WID, 30 * HEI);
     [self.view addSubview:_forgetPasswordButton];
-    [_forgetPasswordButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [_forgetPasswordButton setTitleColor:[UIColor colorWithRed:252 / 255.0 green:105 / 255.0 blue:93 / 255.0 alpha:1] forState:UIControlStateNormal];
     [_forgetPasswordButton setTitle:@"忘记密码?" forState:UIControlStateNormal];
     _forgetPasswordButton.font = [UIFont systemFontOfSize:15];
+    [_forgetPasswordButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.centerY.equalTo(_IRegisterBUtton);
+        make.left.equalTo(_segmentView.mas_right).with.offset(5 * WID);
+    }];
     [_forgetPasswordButton addTarget:self action:@selector(forgetPasswordAction:) forControlEvents:UIControlEventTouchUpInside];
     
     
     
 }
+
+- (void)textChange {
+    VALUECHANGE(_phoneNumberTextfield, _loginButton);
+}
+
 - (void)forgetPasswordAction:(QJLBaseButton *)button {
-//    ForgetViewController *forgetVC = [[ForgetViewController alloc] init];
-//    forgetVC.strURL = [NSString stringWithFormat:@"%@personalcenter/updatepassword", COMMONURL];
-//    [self presentViewController:forgetVC animated:YES completion:^{
-//        
-//    }];
     
     ForgetPasswordViewController *forgetPasswordVC = [[ForgetPasswordViewController alloc] init];
-    [self presentViewController:forgetPasswordVC animated:YES completion:^{
-        
-    }];
+    [self.navigationController pushViewController:forgetPasswordVC animated:YES];
 }
 
 - (void)loginAction:(QJLBaseButton *)button {
@@ -109,7 +151,7 @@
 //    NSString *str = @"api/APIUserManage/APPloginByIOS?UserID=13800000001&PassWord=1";
     NSString *str = [NSString stringWithFormat:@"api/APIUserManage/APPloginByIOS?UserID=%@&PassWord=%@", _phoneNumberTextfield.text, [MyMD5 md5:_passwordTextfield.text]];
     NSString *tempStr = [COMMONURL stringByAppendingString:str];
-    NSLog(@"%@", tempStr);
+    NSLog(@"login: %@", tempStr);
     [NetWorkingTool getNetWorking:tempStr block:^(id result) {
         NSLog(@"登录code: %@", result[@"code"]);
         if ([result[@"code"] isEqualToString:@"1"]) {
@@ -117,32 +159,17 @@
             [SIPLogin loginSIP];
             NSLog(@"登录成功~~~");
             
-            [self dismissViewControllerAnimated:YES completion:^{
-            }];
+            [self dismissViewControllerAnimated:YES completion:nil];
             
             //  登录成功则把信息存储本地, 下次自动登录
-            NSUserDefaults *userdefau = [NSUserDefaults standardUserDefaults];
-            [userdefau setObject:_phoneNumberTextfield.text forKey:@"UserName"];
-            [userdefau setObject:[MyMD5 md5:_passwordTextfield.text] forKey:@"Password"];
+            [UserInformation saveUserName:_phoneNumberTextfield.text Password:_passwordTextfield.text];
+            //  获取用户信息
+            [UserInformation questUserInformationWith:_phoneNumberTextfield.text];
             
-            //  接收用户信息
-            //  http://qianjiale.doggadatachina.com/api/APIUserManage/ShowUserInfo?UserID=18112572968
-            NSString *strURL = [NSString stringWithFormat:@"%@api/APIUserManage/ShowUserInfo?UserID=%@", COMMONURL, _phoneNumberTextfield.text];
-            NSLog(@"strURL: %@",strURL);
-            [NetWorkingTool getNetWorking:strURL block:^(id result) {
-                UserInformation *userInfor = [UserInformation userinforSingleton];
-                NSArray *arr = [UserModel baseModelByArray:result[@"list"]];
-                userInfor.usermodel = arr[0];
-                //  存储用户信息到本地
-                [UserInformation saveInformationToLocalWithModel:userInfor.usermodel];
-                NSLog(@"userInfor.usermodel.UserID: %@", userInfor.usermodel.UserID);
-            }];
-            
-//            //  存储登录成功的信息
-//            [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"loginSuccess"];
-//            [[NSUserDefaults standardUserDefaults] synchronize];
             //  登录成功请求首页数据
-            self.afterLoginSuccessToGetHomepageData();
+            [UserInformation userinforSingleton].doSomething = ^() {
+                self.afterLoginSuccessToGetHomepageData();
+            };
             
         } else {
             //            NSLog(@"登录失败");   //  0, 密码错误;    1, 密码正确
@@ -155,10 +182,9 @@
 }
 
 - (void)registerAction:(QJLBaseButton *)button {
+    
     RegisterViewController *registerVC = [[RegisterViewController alloc] init];
-    [self presentViewController:registerVC animated:YES completion:^{
-       
-    }];
+    [self.navigationController pushViewController:registerVC animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {

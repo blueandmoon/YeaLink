@@ -8,6 +8,11 @@
 
 #import "HeaderView.h"
 
+@interface HeaderView ()
+@property(nonatomic, strong)QJLBaseImageView *scanImageView;
+
+@end
+
 @implementation HeaderView
 
 - (void)createView {
@@ -23,17 +28,27 @@
         make.height.mas_equalTo(30 * HEI);
     }];
     
-    _button = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@"scan"];
-    [self addSubview:_button];
-    _button.frame = CGRectMake(0, 0, 50, 50);
-//    _button.backgroundColor = CUSTOMBLUE;
-    [_button mas_makeConstraints:^(MASConstraintMaker *make) {
+    _scanImageView = [[QJLBaseImageView alloc] init];
+    [self addSubview:_scanImageView];
+    _scanImageView.image = [UIImage imageNamed:@"scan"];
+    [_scanImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(_label);
         make.height.mas_equalTo(18 * HEI);
         make.right.equalTo(self).with.offset(-26 * WID);
         make.width.mas_equalTo(20.5 * WID);
     }];
-//    [_button addTarget:self action:@selector(scanAppDevices:) forControlEvents:UIControlEventTouchUpInside];
+    
+    _button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
+    [self addSubview:_button];
+    _button.opaque = NO;
+
+    [_button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.and.right.and.height.equalTo(self);
+        make.left.equalTo(_scanImageView.mas_left).with.offset(-10);
+    }];
+
+
+
 }
 
 /*

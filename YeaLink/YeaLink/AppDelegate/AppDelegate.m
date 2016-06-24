@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "LeadViewController.h"
 #import "HomepageViewController.h"
 #import "FindViewController.h"
 #import "MyViewController.h"
@@ -15,22 +16,9 @@
 #import "NetworkState.h"
 #import "LoginViewController.h"
 #import "UIImage+Oricon.h"
-
-//  分享
-#import <ShareSDK/ShareSDK.h>
-#import <ShareSDKConnector/ShareSDKConnector.h>
-
-//  腾讯开发平台(对应qq和qq空间) SDK文件
-#import <TencentOpenAPI/TencentOAuth.h>
-#import <TencentOpenAPI/QQApiInterface.h>
-
-//  微信SDK头文件
-#import "WXApi.h"
-
-//  新浪微博SDK头文件
-#import "WeiboSDK.h"
-//  新浪微博SDK需要在项目Build Settings中的Other Linker Flags添加"-ObjC"
-
+#import "ReportVersionInfo.h"
+#import "SIPPhoneHomeViewController.h"
+#import "ObseverCalling.h"
 
 @interface AppDelegate () {
 @private
@@ -51,7 +39,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    
     [NetworkState checkNetworkState];   //  检测网络状态
+    
     
     HomepageViewController *homePageVC = [[HomepageViewController alloc] init];
     FindViewController *findVC = [[FindViewController alloc] init];
@@ -65,22 +56,36 @@
     UINavigationController *newsNaVC = [[UINavigationController alloc] initWithRootViewController:newsVC];
     UINavigationController *myNaVC = [[UINavigationController alloc] initWithRootViewController:myVC];
     
-    homePageNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"首页" image:[UIImage imageNamed:@"Home32"] tag:1000];
+    homePageNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"首页" image:[UIImage imageNamed:@"homeg-1"] tag:1000];
     
-    findNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"发现" image:[UIImage imageNamed:@"Search32"] tag:1001];
-    showNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"秀场" image:[UIImage imageNamed:@"Show32"] tag:1002];
-    newsNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"消息" image:[UIImage imageNamed:@"Msg32"] tag:1003];
-    myNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"我的" image:[UIImage imageNamed:@"User32"] tag:1004];
+    findNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"发现" image:[UIImage imageNamed:@"search-1"] tag:1001];
+//    UIImage *image = [UIImage originImage:[UIImage imageNamed:@"Msg32"] scaleToSize:CGSizeMake(32, 32)];
+    showNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"秀场" image:[UIImage imageNamed:@"showg-1"] tag:1002];
+    newsNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"消息" image:[UIImage imageNamed:@"Msg-1"] tag:1003];
+    myNaVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"我的" image:[UIImage imageNamed:@"user-1"] tag:1004];
     
     
-//    [tab presentViewController:loginVC animated:YES completion:^{
-//        
-//    }];
+
     UITabBarController *tab = [[UITabBarController alloc] init];
     tab.viewControllers = @[homePageNaVC, findNaVC, showNaVC, newsNaVC, myNaVC];
-    self.window.rootViewController = tab;
     
-//    tab.tabBar.tintColor = [UIColor grayColor];
+    //  引导页
+    NSString *currenVersion = [ReportVersionInfo getVersionInfo];
+    NSUserDefaults *userdef = [NSUserDefaults standardUserDefaults];
+    LeadViewController *leadVC = [[LeadViewController alloc] init];
+    NSLog(@"currentVersion: %@", [userdef objectForKey:@"currenVersion"]);
+    if (![[userdef objectForKey:@"currenVersion"] isEqualToString:currenVersion]) {
+        NSLog(@"开始引导页");
+        [userdef setObject:currenVersion forKey:@"currenVersion"];
+        [userdef synchronize];
+        self.window.rootViewController = leadVC;
+    } else {
+        self.window.rootViewController = tab;
+    }
+    leadVC.changeRootVC = ^() {
+        self.window.rootViewController = tab;
+    };
+    
     
     
     tab.delegate = self;
@@ -140,51 +145,34 @@
     
     [self.window makeKeyAndVisible];
     
-#pragma mark    - ShareSDK分享
-    //  设置ShareSDK的appKey
-    [ShareSDK registerApp:@"130229393985c" activePlatforms:@[
-                                                    @(SSDKPlatformTypeSinaWeibo),
-                                                    @(SSDKPlatformTypeWechat),
-                                                    @(SSDKPlatformTypeCopy),
-                                                    @(SSDKPlatformTypeQQ)]
-                 onImport:^(SSDKPlatformType platformType) {
-                                                        switch (platformType) {
-                                                            case SSDKPlatformTypeWechat:
-                                                                [ShareSDKConnector connectWeChat:[WXApi class]];
-                                                                break;
-                                                                case SSDKPlatformTypeQQ:
-                                                                [ShareSDKConnector connectQQ:[QQApiInterface class] tencentOAuthClass:[TencentOAuth class]];
-                                                                break;
-                                                                case SSDKPlatformTypeSinaWeibo:
-                                                                [ShareSDKConnector connectWeibo:[WeiboSDK class]];
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                    } onConfiguration:^(SSDKPlatformType platformType, NSMutableDictionary *appInfo) {
-                                                        switch (platformType) {
-                                                            case SSDKPlatformTypeSinaWeibo:
-                                                                //  设置新浪微博应用信息, 其中authType设置为使用SSO+Web形式授权
-                                                                [appInfo SSDKSetupSinaWeiboByAppKey:@"3745736124" appSecret:@"faf8ad15e9375aab29976de2d1893555" redirectUri:@"http://www.sharesdk.cn" authType:SSDKAuthTypeBoth];
-                                                                break;
-                                                                //  微信分享等待审核中
-                                                                case SSDKPlatformTypeWechat:
-                                                                [appInfo SSDKSetupWeChatByAppId:@"    com.huize.*" appSecret:@"d376575e8ebd6599e7b706a94e366872"];
-                                                                break;
-                                                                //  qq
-                                                                case SSDKPlatformTypeQQ:
-                                                                [appInfo SSDKSetupQQByAppId:@"1105430634" appKey:@"1o4BUs6itbzgazMX" authType:SSDKAuthTypeBoth];
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                    }];
+    //  注册分享
+    [ShareTools registerShare];
     
-    
+    // 设置应用程序右上角的"通知图标"Badge
+//    app.applicationIconBadgeNumber = 0;  // 根据逻辑设置
     
     //  设定不是从相册返回
     [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"selectPhoto"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    //  3DTouch
+    [self configShortcutItems];
+    UIApplicationShortcutItem *shortcutItem = [launchOptions valueForKey:UIApplicationLaunchOptionsShortcutItemKey];
+    //  如果是从快捷选项标签启动app, 则根据不同标识执行不同操作, 然后返回NO, 防止调用- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler
+    
+    if (shortcutItem) {
+        //  判断先前我们设置的快捷选项标签唯一标识, 根据不同标识执行不同操作
+        if ([shortcutItem.type isEqualToString:@"com.huize.video"]) {
+//            [[NSNotificationCenter defaultCenter] postNotificationName:@"entranceType" object:nil userInfo:@{@"type": @"com.huize.video"}];
+            [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"isFrom3DTouchVideo"];
+        } else {
+//            [[NSNotificationCenter defaultCenter] postNotificationName:@"entranceType" object:nil userInfo:@{@"type": @"com.huize.blueTooth"}];
+            [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"isFrom3DTouchBlueTooth"];
+        }
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        return NO;
+    }
     
     return YES;
 }
@@ -214,6 +202,10 @@
     }
 
     
+}
+
+- (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
@@ -251,7 +243,8 @@
             }
             instance->currentCallContextBeforeGoingBackground.call = 0;
         } else if (linphone_call_get_state(call) == LinphoneCallIncomingReceived || linphone_call_get_state(call) == LinphoneCallStreamsRunning) {
-            [_mainViewController displayIncomingCall:call];
+//            [_mainViewController displayIncomingCall:call];
+            [[ObseverCalling shareObseverCalling] displayIncomingCall:call];
             // in this case, the ringing sound comes from the notification.
             // To stop it we have to do the iOS7 ring fix...
             [self fixRing];
@@ -332,5 +325,30 @@
     }
 }
 
+#pragma - mark  - 3DTouch
+- (void)configShortcutItems {
+    
+    NSMutableArray *shortcutItems = [NSMutableArray array];
+    UIApplicationShortcutIcon *videoIcon = [UIApplicationShortcutIcon iconWithTemplateImageName:@"video"];
+    UIApplicationShortcutItem *videoItem = [[UIApplicationShortcutItem alloc] initWithType:@"com.huize.video" localizedTitle:@"video" localizedSubtitle:nil icon:videoIcon userInfo:nil];
+    
+    UIApplicationShortcutIcon *blueToothIcon = [UIApplicationShortcutIcon iconWithTemplateImageName:@"blueTooth"];
+    UIApplicationShortcutItem *blueToothItem = [[UIApplicationShortcutItem alloc] initWithType:@"com.huize.blueTooth" localizedTitle:@"blueTooth" localizedSubtitle:nil icon:blueToothIcon userInfo:nil];
+    
+    [shortcutItems addObjectsFromArray:@[videoItem, blueToothItem]];
+    [[UIApplication sharedApplication] setShortcutItems:shortcutItems];
+}
+
+- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler {
+    
+    if ([shortcutItem.type isEqualToString:@"com.huize.video"]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"entranceType" object:nil userInfo:@{@"type": @"com.huize.video"}];
+        NSLog(@"3DTouch:1");
+    } else {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"entranceType" object:nil userInfo:@{@"type": @"com.huize.blueTooth"}];
+        NSLog(@"3DTouch:2");
+    }
+
+}
 
 @end

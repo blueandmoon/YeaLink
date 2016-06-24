@@ -11,5 +11,6 @@
  *  点击个人中心的cell跳转的页面webview
  */
 @interface SetWebViewController : BaseWebViewController
+@property(nonatomic, strong)void(^refreshDataPerson)();
 
 @end

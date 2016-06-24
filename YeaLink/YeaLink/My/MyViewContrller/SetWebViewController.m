@@ -20,16 +20,11 @@
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.hidden = NO;
     
-    [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
+        [self getHtmlWithstr:[UserInformation userinforSingleton].strURL];
+    }
 
-//    _button = [QJLBaseButton buttonWithType:UIButtonTypeCustom];
-//    [_button setTitle:@"个人中心" forState:UIControlStateNormal];
-//    _button.font = [UIFont systemFontOfSize:15];
-//    //    [_button setBackgroundImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-//    [self.view addSubview:_button];
-//    [_button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-//    [_button addTarget:self action:@selector(backAction:) forControlEvents:UIControlEventTouchUpInside];
-//    _button.frame = CGRectMake(50 * WID, 25 * HEI, 70 * WID, 30 * HEI);
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -43,8 +38,13 @@
     
     [self settingNavigationbar];
 
+    __weak SetWebViewController *blockSelf = self;
     self.backNative = ^() {
-        [self.navigationController popViewControllerAnimated:YES];
+        [blockSelf.navigationController popViewControllerAnimated:YES];
+    };
+    
+    self.refreshDataWhenchangeCell = ^() {
+        blockSelf.refreshDataPerson();
     };
     
 }

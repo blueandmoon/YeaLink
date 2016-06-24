@@ -70,13 +70,17 @@
     } else {
         ServiceModel *model = self.tempArr[indexPath.row];
         if (model.SeviceAddress.length != 0) {
-            NSString *str = [NSString stringWithFormat:@"http://%@", model.SeviceAddress];
-            NSLog(@"-----%@", str);
-            [UserInformation userinforSingleton].strURL = str;
-            //        //  要先跳转, 再发通知, 才好使
-            self.pushview(str);
-            //        [[NSNotificationCenter defaultCenter] postNotificationName:@"nextUrl" object:nil userInfo:@{@"url":str}];
-            NSLog(@"[UserInformation userinforSingleton].strURL: %@", [UserInformation userinforSingleton].strURL);
+            if ([model.GUID isEqualToString:@"24"]) {
+                self.pushViewToAccessControl(); //  跳转到门禁开门页面
+            } else {
+                NSString *str = [NSString stringWithFormat:@"http://%@", model.SeviceAddress];
+                NSLog(@"-----%@", str);
+                [UserInformation userinforSingleton].strURL = str;
+                //        //  要先跳转, 再发通知, 才好使
+                self.pushview();
+                //        [[NSNotificationCenter defaultCenter] postNotificationName:@"nextUrl" object:nil userInfo:@{@"url":str}];
+//                NSLog(@"[UserInformation userinforSingleton].strURL: %@", [UserInformation userinforSingleton].strURL);                
+            }
             
         } else {
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"对不起" message:@"当前服务未开通" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];

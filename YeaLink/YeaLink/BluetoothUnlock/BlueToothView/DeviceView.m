@@ -25,6 +25,7 @@
     
     _button = [QJLBaseButton buttonCustomFrame:CGRectZero normalImageString:@"blueToothImage"];
     [_bottomView addSubview:_button];
+    _button.enabled = NO;
     [_button mas_makeConstraints:^(MASConstraintMaker *make) {
         make.center.equalTo(_bottomView);
         make.size.mas_equalTo(CGSizeMake(100 * WID, 100 * HEI));

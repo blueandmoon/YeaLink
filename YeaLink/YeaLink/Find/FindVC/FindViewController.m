@@ -9,10 +9,7 @@
 #import "FindViewController.h"
 #import "FindWebViewController.h"
 
-#import "WebViewJavascriptBridge.h"
-
 @interface FindViewController ()<UIWebViewDelegate>
-@property(nonatomic, strong)WebViewJavascriptBridge *bridge;
 
 @end
 
@@ -20,9 +17,11 @@
 {
     QJLBaseImageView *imageView;
 }
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.hidden = NO;
+//    [UserInformation userinforSingleton].isFind = YES;
     
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"selectPhoto"] isEqualToString:@"1"]) {
         //  判定是否从相册返回, 若是, 不再重新加载, 而是返回原页面
@@ -30,6 +29,11 @@
     } else {
         [self getHtmlWithstr:@"/find/find"];
     }
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+//    [UserInformation userinforSingleton].isFind = NO;
+    [super viewWillDisappear:animated];
 }
 
 
@@ -43,22 +47,32 @@
         NSLog(@"没有原生页面, 怎么返回");
     };
     
+    
+    
 }
 
+
+
 - (void)settingNavigationbar {
+    __weak FindViewController *blockSelf = self;
     QJLBaseLabel *label = [QJLBaseLabel LabelWithFrame:CGRectMake(0, 0, 200 * WID, 30 * HEI) text:@"发现" titleColor:[UIColor whiteColor] textAlignment:NSTextAlignmentCenter font:[UIFont systemFontOfSize:19]];
     self.navigationItem.titleView = label;
     self.navigationController.navigationBar.barTintColor = CUSTOMBLUE;
     self.takeStr = ^(NSString *currentTitle) {
         label.text = currentTitle;
+        if ([currentTitle isEqualToString:@"发现"]) {
+            blockSelf.navigationItem.hidesBackButton = YES;
+            blockSelf.navigationItem.leftBarButtonItem = nil;
+        } else {
+            blockSelf.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:blockSelf action:@selector(back:)];
+        }
     };
     label.numberOfLines = 0;
     [label sizeToFit];
     
-    __weak FindViewController *blockSelf = self;
     self.changeShowLeftButton = ^(NSString *urlStr) {
         if ([urlStr rangeOfString:@"find?"].location != NSNotFound) {
-            blockSelf.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"search"] style:UIBarButtonItemStylePlain target:self action:@selector(rightAction:)];
+            blockSelf.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"search"] style:UIBarButtonItemStylePlain target:blockSelf action:@selector(rightAction:)];
         } else {
             blockSelf.navigationItem.rightBarButtonItem = nil;
         }
@@ -66,13 +80,22 @@
     
     //  会影响导航栏上所有除返回以外的按钮
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(back:)];
-    
-//    self.navigationItem.leftBarButtonItem = nil;
     
 }
 
 - (void)back:(id)sender {
+    //  h5页面的返回
+    __weak BaseWebViewController *blockSelf = self;
+    self.backforH5 = ^(UIWebView *webview) {
+        NSString *Str = [webview stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"gotoPre();"]];
+        NSLog(@"jsStr: %@", Str);
+        if ([Str isEqualToString:@"a"] || [Str isEqualToString:@"b"]) {
+            //            NSLog(@"我该怎么返回!");
+        } else {
+            //  返回native
+            blockSelf.backNative();
+        }
+    };
     self.backforH5(self.wv);
 }
 

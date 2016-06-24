@@ -17,7 +17,7 @@
     return self;
 }
 
-- (UIImage *)originImage:(UIImage *)image scaleToSize:(CGSize)size {
++ (UIImage *)originImage:(UIImage *)image scaleToSize:(CGSize)size {
     UIGraphicsBeginImageContext(size);  //  size为CGSize类型, 即为所需要的图片尺寸
     [image drawAsPatternInRect:CGRectMake(0, 0, size.width, size.height)];
     UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();

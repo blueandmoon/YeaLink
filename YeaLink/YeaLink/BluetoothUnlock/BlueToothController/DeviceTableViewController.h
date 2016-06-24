@@ -45,13 +45,13 @@
 //- (IBAction)SendConnectDevice:(id)sender; //  连接设备
 - (void)SendConnectDevice;
 //- (IBAction)SendReadDeviceInfo:(id)sender;    //  读取设备信息
-- (void)SendReadDeviceInfo:(id)sender;
+//- (void)SendReadDeviceInfo:(id)sender;
 //- (IBAction)SendConfigDevice:(id)sender;  //  发送配置
-- (void)SendConfigDevice:(id)sender;
+//- (void)SendConfigDevice:(id)sender;
 //- (IBAction)SendReadConfig:(id)sender;    //  读取配置
-- (void)SendReadConfig:(id)sender;
+//- (void)SendReadConfig:(id)sender;
 //- (IBAction)SendSetPassword:(id)sender;   //  设置密码
-- (void)SendSetPassword:(id)sender;
+//- (void)SendSetPassword:(id)sender;
 //- (IBAction)SendModifyName:(id)sender;    //  修改名称
 - (void)SSendModifyName:(id)sender;
 //- (IBAction)SendOpenDoor:(id)sender;  //  开门

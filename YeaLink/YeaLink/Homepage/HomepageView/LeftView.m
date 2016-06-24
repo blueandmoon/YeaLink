@@ -15,7 +15,7 @@
     
     _iconView = [[QJLBaseImageView alloc] init];
     [self addSubview:_iconView];
-    _iconView.image = [UIImage imageNamed:@"Local32"];
+    _iconView.image = [UIImage imageNamed:@"localg-1"];
 //    _iconView.backgroundColor = [UIColor grayColor];
     [_iconView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.height.and.centerY.and.right.equalTo(self);

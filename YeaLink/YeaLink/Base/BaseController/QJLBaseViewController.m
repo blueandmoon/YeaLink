@@ -16,9 +16,6 @@
 
 - (instancetype)init {
     if (self == [super init]) {
-//        _bgImageView = [[QJLBaseImageView alloc] initWithImage:[UIImage imageNamed:@"start_icon375"]];
-//        [self.view addSubview:_bgImageView];
-//        _bgImageView.hidden = NO;
         //  会影响导航栏上所有除返回以外的按钮
         [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     }
@@ -28,11 +25,36 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    //  定位
+    [UserLocation shareGpsManager];
+    
+}
+
+- (void)questData {
+    
+}
+
+- (void)newData {
+    
+}
+
+- (void)getView {
+    
+}
+
+- (void)getValue {
+    
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+    NSLog(@"did receive Memory Warning!");
+    [ReportMemory reportCurrentMemory];
+//    NSLog(@"~~~~~~~~~~~%@~~~~~~~~~~~%d", (int)OSMemoryNotificationLevelNormal);
+    [self addObserver:self forKeyPath:UIApplicationDidReceiveMemoryWarningNotification options:0 || 1 context:nil];
+    
 }
 
 /*
